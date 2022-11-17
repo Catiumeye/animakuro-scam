@@ -63,7 +63,8 @@ async function createServer() {
         resolvers: [
             __dirname + '/**/*.resolver.ts',
             __dirname + '/**/*.resolver.js'
-        ]
+        ],
+        emitSchemaFile: true
     })
 
     app.use(cors())
