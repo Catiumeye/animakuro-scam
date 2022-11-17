@@ -9,6 +9,9 @@ const mailer = nodemailer.createTransport({
         user: process.env.MAILER_EMAIL, // generated ethereal user
         pass: process.env.MAILER_PASSWORD, // generated ethereal password
     },
+    tls: {
+        rejectUnauthorized: false
+    }
 }, {
     from: {
         name: process.env.MAILER_SENDER_NAME,
