@@ -15,12 +15,12 @@ export class AuthResolver {
     async register(@Arg('data') data: RegisterInput) {
         const user = await prisma.user.findFirst({
             where: {
-                username: data.username
+                email: data.email
             }
         })
 
         if (user)
-            throw errors.AUTH_ERROR('USERNAME_TAKEN')
+            throw errors.AUTH_ERROR('EMAIL_TAKEN')
 
         // const code = await nanoid(30)
         const code = randomUUID()
