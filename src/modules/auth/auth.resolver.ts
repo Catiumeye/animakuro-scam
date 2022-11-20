@@ -8,7 +8,7 @@ import { ConfirmInput, LoginInput, LoginReturnType, LoginType, RegisterInput, Tw
 import { compare, hash } from '@utils/password.util'
 import { randomUUID } from 'crypto'
 import { errors } from '../../errors/errors'
-
+ 
 @Resolver()
 export class AuthResolver {
     @Mutation(() => Boolean)
