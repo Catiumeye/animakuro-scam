@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  # animakuro-node:
+  #   build:
+  #     context: .
+  #     dockerfile: .
+  #   depends_on:
+  #     - mysql-animakuro
+  #     - redis-animakuro
+  #   ports:
+  #     - "8080:8080"
+  mysql-animakuro:
+    restart: always
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=toor
+    # volumes:
+  redis-animakuro:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    restart: always
+    # volumes:
+

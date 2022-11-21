@@ -39,3 +39,17 @@ enum Gender {
   FEMALE
   CUSTOM
 }
+
+
+model Studio {
+  id              String   @id @default(uuid())
+  createdAt       DateTime @default(now())
+  deleted         Boolean  @default(false)
+  name            String   @db.VarChar(64)
+  genre           String   @db.VarChar(64)
+  existencePeriod String   @db.VarChar(64)
+  rating          String   @db.VarChar(64)
+  grade           String   @db.VarChar(64)
+  timekeeping     String   @db.VarChar(64)
+  thumbnail       String   @db.Text
+}
