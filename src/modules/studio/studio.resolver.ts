@@ -1,20 +1,31 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { prisma, redis } from '../../index'
-import { Studio } from './studio.schema'
+import { Studio, StudioInput } from './studio.schema'
  
 @Resolver()
 export class StudioResolver {
     @Mutation(() => Studio)
-    async studio() {
-        console.log('create')
+    async createStudio(
+        @Arg('data') data: StudioInput
+    ) {
+        const studio = prisma.studio.create({
+            data,
+        })
 
-        return true
+        return studio
     }
 
     @Query(() => [Studio]) 
     async studios() {
-        console.log('get')
-
         return prisma.studio.findMany()
+    }
+
+    @Mutation(() => Studio)
+    async deleteStudio(@Arg('id') id: string) {
+        return prisma.studio.delete({
+            where: {
+                id
+            }
+        })
     }
 }
