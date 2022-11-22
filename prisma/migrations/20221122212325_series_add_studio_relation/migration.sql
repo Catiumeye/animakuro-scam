@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE `Movie` (
+CREATE TABLE `Series` (
     `id` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `deleted` BOOLEAN NOT NULL DEFAULT false,
@@ -10,4 +10,4 @@ CREATE TABLE `Movie` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `Movie` ADD CONSTRAINT `Movie_studioId_fkey` FOREIGN KEY (`studioId`) REFERENCES `Studio`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Series` ADD CONSTRAINT `Series_studioId_fkey` FOREIGN KEY (`studioId`) REFERENCES `Studio`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

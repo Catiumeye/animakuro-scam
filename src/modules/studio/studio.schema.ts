@@ -1,5 +1,7 @@
 import { Field, ID, InputType, ObjectType } from 'type-graphql'
-import { Movie, MovieInput } from '../movie/movie.schema';
+
+import { Series } from './../series/series.schema';
+
 
 @ObjectType()   
 export class Studio {
@@ -16,25 +18,13 @@ export class Studio {
     name: string;
 
     @Field()
-    genre: string;
-
-    @Field()
-    existencePeriod: string;
-
-    @Field()
     rating: string;
 
     @Field()
-    grade: string;
-    
-    @Field()
-    timekeeping: string;
-    
-    @Field()
     thumbnail: string;
 
-    @Field(() => [Movie])
-    movies?: Movie[]
+    @Field(() => [Series])
+    series?: Series[]
 }
 
 @InputType()
@@ -43,19 +33,7 @@ export class StudioInput {
     name: string;
 
     @Field({ nullable: true })
-    genre: string;
-
-    @Field({ nullable: true })
-    existencePeriod: string;
-
-    @Field({ nullable: true })
-    rating: string;
-
-    @Field({ nullable: true })
-    grade: string;
-
-    @Field({ nullable: true })
-    timekeeping: string;
+    rating: number;
 
     @Field({ nullable: true })
     thumbnail: string;

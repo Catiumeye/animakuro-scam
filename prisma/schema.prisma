@@ -45,16 +45,13 @@ model Studio {
   createdAt       DateTime @default(now())
   deleted         Boolean  @default(false)
   name            String   @db.VarChar(64)
-  genre           String   @db.VarChar(64)
-  existencePeriod String   @db.VarChar(64)
-  rating          String   @db.VarChar(64)
-  grade           String   @db.VarChar(64)
-  timekeeping     String   @db.VarChar(64)
+  rating          Float    @db.Float
+  // grade           Float    @db.Float      
   thumbnail       String   @db.Text
-  movies          Movie[]
+  series          Series[]
 }
 
-model Movie {
+model Series {
   id              String   @id @default(uuid())
   createdAt       DateTime @default(now())
   deleted         Boolean  @default(false)
