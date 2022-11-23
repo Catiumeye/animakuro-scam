@@ -15,7 +15,7 @@ export class Series {
     @Field()
     name: string;
 
-    @Field(() => Studio)
+    @Field(() => Studio, { nullable: true })
     studio?: Studio
 }
 

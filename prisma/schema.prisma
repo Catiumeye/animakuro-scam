@@ -56,6 +56,6 @@ model Series {
   createdAt       DateTime @default(now())
   deleted         Boolean  @default(false)
   name            String   @db.VarChar(64)
-  studio          Studio   @relation(fields: [studioId], references: [id])
-  studioId        String
+  studio          Studio?  @relation(fields: [studioId], references: [id])
+  studioId        String?
 }

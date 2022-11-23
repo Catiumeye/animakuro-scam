@@ -15,10 +15,19 @@ export class StudioResolver {
         return studio
     }
 
-    @Query(() => [Studio]) 
-    async studios() {
-        return prisma.studio.findMany()
+    @Mutation(() => Studio)
+    async updateStudio(
+        @Arg('id') id: string,
+        @Arg('data') data: StudioInput
+    ) {
+        return prisma.studio.update({
+            where: {
+                id
+            },
+            data
+        })
     }
+
 
     @Mutation(() => Studio)
     async deleteStudio(@Arg('id') id: string) {
@@ -27,5 +36,33 @@ export class StudioResolver {
                 id
             }
         })
+    }
+
+    @Query(() => [Studio]) 
+    async studios(
+        @Arg('take', { nullable: true }) take: number,
+        @Arg('skip', { nullable: true }) skip: number,
+        @Arg('orderBy', { nullable: true }) orderBy: string,
+        @Arg('order', { nullable: true }) order: string,
+        @Arg('search', { nullable: true }) search: string,
+    ) {
+        const studios = await prisma.studio.findMany({
+            take,
+            skip,
+            orderBy: {
+                [orderBy]: order
+            },
+            where: {
+                name: {
+                    contains: search
+                }
+            },
+            include: {
+                series: true
+            }
+        })
+
+        return studios
+       
     }
 }

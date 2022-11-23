@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { prisma } from '../../index'
 import { Series, SeriesInput } from './series.schema'
@@ -8,7 +9,8 @@ export class SeriesResolver {
     async createSeries(
         @Arg('data') data: SeriesInput,
     ) {
-        const series = prisma.series.create({
+
+        return prisma.series.create({
             data: {
                 ...data,
                 studio: {
@@ -16,16 +18,30 @@ export class SeriesResolver {
                 }
             },
             include: {
-                studio: true
+                studio: !!data.studio
             }
         })
-
-        return series
     }
 
-    @Query(() => [Series]) 
-    async series() {
-        return prisma.series.findMany()
+    @Mutation(() => Series)
+    async updateSeries(
+        @Arg('id') id: string,
+        @Arg('data') data: SeriesInput,
+    ) {
+        return prisma.series.update({
+            where: {
+                id
+            },
+            data: {
+                ...data,
+                studio: {
+                    connect: data.studio
+                }
+            },
+            include: {
+                studio: !!data.studio
+            }
+        })
     }
 
     @Mutation(() => Series)
@@ -36,4 +52,15 @@ export class SeriesResolver {
             }
         })
     }
+
+
+    @Query(() => [Series]) 
+    async series() {
+        return prisma.series.findMany({
+            include: {
+                studio: true
+            },
+        })
+    }
+
 }
