@@ -1,6 +1,8 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { GqlHttpException, HttpStatus } from 'errors/errors';
+import { Max } from 'class-validator'
+import { Arg, Args, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { prisma, redis } from '../../index'
-import { Studio, StudioInput } from './studio.schema'
+import { Studio, StudioInput, StudiosArgs, UpdateStudioInput } from './studio.schema'
  
 @Resolver()
 export class StudioResolver {
@@ -18,8 +20,19 @@ export class StudioResolver {
     @Mutation(() => Studio)
     async updateStudio(
         @Arg('id') id: string,
-        @Arg('data') data: StudioInput
+        @Arg('data') data: UpdateStudioInput
     ) {
+        const isStudioExists = await prisma.studio.findFirst({
+            where: {
+                id,
+            }
+        })
+    
+        if (!isStudioExists) {
+            throw new GqlHttpException(`Studio ${id} not found`, HttpStatus.NOT_FOUND)
+        }
+
+
         return prisma.studio.update({
             where: {
                 id
@@ -40,18 +53,11 @@ export class StudioResolver {
 
     @Query(() => [Studio]) 
     async studios(
-        @Arg('take', { nullable: true }) take: number,
-        @Arg('skip', { nullable: true }) skip: number,
-        @Arg('orderBy', { nullable: true }) orderBy: string,
-        @Arg('order', { nullable: true }) order: string,
-        @Arg('search', { nullable: true }) search: string,
+        @Args() { skip, take, search }: StudiosArgs
     ) {
         const studios = await prisma.studio.findMany({
             take,
             skip,
-            orderBy: {
-                [orderBy]: order
-            },
             where: {
                 name: {
                     contains: search

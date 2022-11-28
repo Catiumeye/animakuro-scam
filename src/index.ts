@@ -1,18 +1,18 @@
 import 'reflect-metadata'
 import express from 'express'
 import cors from 'cors'
-import { buildSchema } from 'type-graphql'
+import { AuthChecker, buildSchema } from 'type-graphql'
 import { graphqlUploadExpress } from 'graphql-upload'
 import { graphqlHTTP } from 'express-graphql'
-import { parse } from 'graphql'
-import { compileQuery } from 'graphql-jit'
 import { createClient } from 'redis'
 import { PrismaClient } from '@prisma/client'
 import { Server } from 'http'
+import { ICustomContext } from './types/custom-context.interface';
 
 import * as dotenv from 'dotenv'
-import { ApiError, errors } from './errors/errors'
-import { ValidationError } from 'class-validator'
+import exceptionsHandler from 'errors/exception-handler'
+import { ExtendedGraphQLError } from 'errors/types'
+import { GqlHttpException } from 'errors/errors'
 
 dotenv.config()
 
@@ -58,6 +58,22 @@ main().catch(console.error)
 
 const cache = {}
 
+
+export const customAuthChecker: AuthChecker<ICustomContext> = (
+    { root, args, context, info },
+    roles,
+  ) => {
+    // checks perrmision access for Mutations and Queries fields
+    const token = context.request.headers.authorization
+    
+    // here we can read the user from context
+    // and check his permission in the db against the `roles` argument
+    // that comes from the `@Authorized` decorator, eg. ["ADMIN", "MODERATOR"]
+    // console.log(roles, info, root)
+    throw new GqlHttpException(`You don't have permission to access ${info.fieldName}`, 403)
+};
+
+
 async function createServer() {
     const app = express()
     const schema = await buildSchema({
@@ -65,7 +81,15 @@ async function createServer() {
             __dirname + '/**/*.resolver.ts',
             __dirname + '/**/*.resolver.js'
         ],
-        emitSchemaFile: true
+        emitSchemaFile: true,
+        authChecker: customAuthChecker,
+        // authMode: 'null',
+        // globalMiddlewares: [
+        //     (req: any, res: any, next) => {
+        //         console.log(req.headers)
+        //         next()
+        //     }
+        // ]
     })
 
     app.use(cors())
@@ -76,33 +100,8 @@ async function createServer() {
                 schema,
                 context: { request, response },
                 graphiql: false,
-                customFormatErrorFn(error) {
-                    if (error.originalError instanceof ApiError) return {
-                        path: error.path,
-                        message: error.originalError.identifier,
-                        extensions: error.originalError.export()
-                    }
-
-                    if (error.originalError && error.originalError["validationErrors"]) {
-                        const errorList = error.originalError["validationErrors"]
-                        // noinspection TypeScriptValidateJSTypes
-                        const validation = errors.VALIDATION(errorList.filter(it => it instanceof ValidationError).map(it => ({
-                            property: it.property as string,
-                            reasons: Object.values(it.constraints) as string[]
-                        })))
-                        return {
-                            path: error.path,
-                            message: validation.identifier,
-                            extensions: validation.export()
-                        }
-                    }
-                    const internal = errors.INTERNAL()
-                    console.error(error.path, error.originalError)
-                    return {
-                        path: error.path,
-                        message: internal.identifier,
-                        extensions: internal.export()
-                    }
+                customFormatErrorFn: (error: ExtendedGraphQLError) => {
+                    return exceptionsHandler(error, response)
                 }
             }
         })
@@ -147,3 +146,5 @@ async function createServer() {
 //
 //     return {apolloServer, expressServer, httpServer}
 // }
+
+

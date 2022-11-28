@@ -1,4 +1,5 @@
-import { Field, ID, InputType, ObjectType } from 'type-graphql'
+import { IsEmail, Max, MinLength } from 'class-validator';
+import { Field, ID, InputType, ObjectType, createUnionType, Authorized, ArgsType, Int } from 'type-graphql'
 
 import { Series } from './../series/series.schema';
 
@@ -18,7 +19,7 @@ export class Studio {
     name: string;
 
     @Field()
-    rating: string;
+    rating: number;
 
     @Field()
     thumbnail: string;
@@ -29,12 +30,45 @@ export class Studio {
 
 @InputType()
 export class StudioInput {
-    @Field({ nullable: true })
+    @Field()
     name: string;
 
-    @Field({ nullable: true })
+    @Field()
     rating: number;
-
-    @Field({ nullable: true })
+    
+    @Field()
     thumbnail: string;
+}
+
+@InputType()
+export class UpdateStudioInput {
+    @Field({ nullable: true})
+    name?: string;
+
+    @Field({ nullable: true})
+    rating?: number;
+    
+    @Field({ nullable: true})
+    thumbnail?: string;
+}
+
+
+@ArgsType()
+export class StudiosArgs {
+    @Max(50)
+    @Field(() => Int, { nullable: true })
+    skip?: number;
+
+    @Max(50)
+    @Field(() => Int, { nullable: true, defaultValue: 10 })
+    take?: number;
+
+    @Field(() => String, { nullable: true })
+    orderBy?: string;
+
+    @Field(() => String, { nullable: true })
+    order?: string;
+
+    @Field(() => String, { nullable: true })
+    search?: string;
 }

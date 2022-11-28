@@ -1,14 +1,26 @@
-import { Prisma } from '@prisma/client'
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { GqlHttpException, HttpStatus } from 'errors/errors'
 import { prisma } from '../../index'
 import { Series, SeriesInput } from './series.schema'
  
+
 @Resolver()
 export class SeriesResolver {
     @Mutation(() => Series)
     async createSeries(
         @Arg('data') data: SeriesInput,
     ) {
+        if (data.studio) {
+            const isStudioExists = await prisma.studio.findFirst({
+                where: {
+                    id: data.studio.id,
+                }
+            })
+
+            if (!isStudioExists) {
+                throw new GqlHttpException(`Studio ${data.studio.id} not found`, HttpStatus.NOT_FOUND)
+            }
+        }
 
         return prisma.series.create({
             data: {
@@ -28,6 +40,18 @@ export class SeriesResolver {
         @Arg('id') id: string,
         @Arg('data') data: SeriesInput,
     ) {
+        if (data.studio) {
+            const isStudioExists = await prisma.studio.findFirst({
+                where: {
+                    id: data.studio.id,
+                }
+            })
+
+            if (!isStudioExists) {
+                throw new GqlHttpException(`Studio ${data.studio.id} not found`, HttpStatus.NOT_FOUND)
+            }
+        }
+
         return prisma.series.update({
             where: {
                 id
