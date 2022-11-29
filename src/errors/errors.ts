@@ -83,6 +83,9 @@ export enum HttpStatus {
     HTTP_VERSION_NOT_SUPPORTED = 505
 }
 
+/**
+ * Throws exeption that can be catched by api middleware
+**/
 export class GqlHttpException extends Error {
     readonly statusCode: HttpStatus;
     readonly error: string;

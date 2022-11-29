@@ -11,7 +11,6 @@ import { ICustomContext } from './types/custom-context.interface';
 
 import * as dotenv from 'dotenv'
 import { ExtendedGraphQLError } from 'errors/types'
-import { GqlHttpException } from 'errors/errors'
 import exceptionsHandler from 'errors/exception-handler'
 
 dotenv.config()
@@ -64,16 +63,13 @@ export const customAuthChecker: AuthChecker<ICustomContext> = (
     permissions,
   ) => {
     // checks perrmision access for Mutations and Queries fields
-    const token = context.request.headers.authorization
-    
 
-
-    /*  EXAMPLE 
+    /*  EXAMPLE uncomment with exaple decorators in series resolvers and schemas
 
         const userPermissions = [
-        // 'moderator? does not matter'
-        'createStudio',
-        'studios',
+            'createSeries:name',
+            'createSeries',
+            'series:name',
         ]
 
         for (const allowed of permissions) {
@@ -83,10 +79,12 @@ export const customAuthChecker: AuthChecker<ICustomContext> = (
                 }
             }
         }
+
+        otherwise -
+        throw new GqlHttpException(`You don't have permission to access ${info.fieldName}`, HttpStatus.FORBIDDEN)
     */
-    
+
     return true
- 
 };
 
 

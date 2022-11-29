@@ -1,4 +1,6 @@
-import { Arg, Mutation, Query, Resolver } from 'type-graphql'
+import { validatePermission } from 'modules/auth/permission/permision-validator';
+import { Arg, Authorized, Mutation, Query, Resolver } from 'type-graphql'
+
 import { GqlHttpException, HttpStatus } from 'errors/errors'
 import { prisma } from '../../index'
 import { Series } from './series.schema'
@@ -9,9 +11,14 @@ import { UpdateSeriesInput } from './input-schema/update-series.schema'
 @Resolver()
 export class SeriesResolver {
     @Mutation(() => Series)
+    // example 
+    // @Authorized('createSeries')
     async createSeries(
         @Arg('data') data: CreateSeriesInput,
     ) {
+        // for AllowChangeBy decorator
+        // validatePermission(data, 'userId', ['createSeries'])
+
         if (data.studio) {
             const isStudioExists = await prisma.studio.findFirst({
                 where: {

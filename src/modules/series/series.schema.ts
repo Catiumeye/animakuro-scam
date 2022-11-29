@@ -12,6 +12,8 @@ export class Series {
     @Field()
     deleted: boolean;
 
+    // example 
+    // @Authorized('series:name')
     @Field()
     name: string;
 

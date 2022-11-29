@@ -6,6 +6,7 @@ export const METADATA_KEY = 'allow-change-by';
 
 interface AllowChangeByDecoratorOptions {
   /**
+   * Use this decorator only with InputType fields, use 'validetePerrmission' function to validete
    * @param orSameUidAs - The name of the field that contains the uid of the user that created the object
    * @param scopes - The scopes that are allowed to change the object
    */
