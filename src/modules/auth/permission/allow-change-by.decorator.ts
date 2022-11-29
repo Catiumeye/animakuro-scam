@@ -6,7 +6,6 @@ export const METADATA_KEY = 'allow-change-by';
 
 interface AllowChangeByDecoratorOptions {
   /**
-   * Use this decorator only with InputType fields, use 'validetePerrmission' function to validete
    * @param orSameUidAs - The name of the field that contains the uid of the user that created the object
    * @param scopes - The scopes that are allowed to change the object
    */
@@ -30,7 +29,9 @@ const containsAllowedScopes = (
   
   return requestorScopes.some((scope) => allowedScopeSet.has(scope));
 };
-
+/**
+ * Use this decorator only with InputType fields, use 'validetePerrmission' function to validete
+ **/
 export function AllowChangeBy(decoratorOptions: AllowChangeByDecoratorOptions = {}) {
     return (target: any, propertyName: string) => {
         const validateFn = (target: any, uid: string, requestorScopes: any) => {
