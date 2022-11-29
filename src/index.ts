@@ -10,9 +10,9 @@ import { Server } from 'http'
 import { ICustomContext } from './types/custom-context.interface';
 
 import * as dotenv from 'dotenv'
-import exceptionsHandler from 'errors/exception-handler'
 import { ExtendedGraphQLError } from 'errors/types'
 import { GqlHttpException } from 'errors/errors'
+import exceptionsHandler from 'errors/exception-handler'
 
 dotenv.config()
 
@@ -61,16 +61,32 @@ const cache = {}
 
 export const customAuthChecker: AuthChecker<ICustomContext> = (
     { root, args, context, info },
-    roles,
+    permissions,
   ) => {
     // checks perrmision access for Mutations and Queries fields
     const token = context.request.headers.authorization
     
-    // here we can read the user from context
-    // and check his permission in the db against the `roles` argument
-    // that comes from the `@Authorized` decorator, eg. ["ADMIN", "MODERATOR"]
-    // console.log(roles, info, root)
-    throw new GqlHttpException(`You don't have permission to access ${info.fieldName}`, 403)
+
+
+    /*  EXAMPLE 
+
+        const userPermissions = [
+        // 'moderator? does not matter'
+        'createStudio',
+        'studios',
+        ]
+
+        for (const allowed of permissions) {
+            for (const current of userPermissions) {
+                if (allowed === current) {
+                    return true
+                }
+            }
+        }
+    */
+    
+    return true
+ 
 };
 
 

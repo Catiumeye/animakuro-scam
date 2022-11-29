@@ -1,5 +1,5 @@
-import { Field, ID, InputType, ObjectType } from 'type-graphql'
-import { Studio, StudioInput } from '../studio/studio.schema';
+import { Field, ID, ObjectType } from 'type-graphql'
+import { Studio } from '../studio/studio.schema';
 
 @ObjectType()   
 export class Series {
@@ -19,17 +19,3 @@ export class Series {
     studio?: Studio
 }
 
-@InputType()
-export class SeriesStudioInput {
-    @Field()
-    id: string;
-}
-
-@InputType()
-export class SeriesInput {
-    @Field({ nullable: true})
-    name: string;
-
-    @Field({ nullable: true})
-    studio?: SeriesStudioInput;
-}

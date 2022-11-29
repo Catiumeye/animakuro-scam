@@ -1,14 +1,16 @@
-import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { Arg, Mutation, Query, Resolver } from 'type-graphql'
 import { GqlHttpException, HttpStatus } from 'errors/errors'
 import { prisma } from '../../index'
-import { Series, SeriesInput } from './series.schema'
+import { Series } from './series.schema'
+import { CreateSeriesInput } from './input-schema/create-series.schema'
+import { UpdateSeriesInput } from './input-schema/update-series.schema'
  
 
 @Resolver()
 export class SeriesResolver {
     @Mutation(() => Series)
     async createSeries(
-        @Arg('data') data: SeriesInput,
+        @Arg('data') data: CreateSeriesInput,
     ) {
         if (data.studio) {
             const isStudioExists = await prisma.studio.findFirst({
@@ -38,7 +40,7 @@ export class SeriesResolver {
     @Mutation(() => Series)
     async updateSeries(
         @Arg('id') id: string,
-        @Arg('data') data: SeriesInput,
+        @Arg('data') data: UpdateSeriesInput,
     ) {
         if (data.studio) {
             const isStudioExists = await prisma.studio.findFirst({

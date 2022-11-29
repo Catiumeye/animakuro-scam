@@ -1,15 +1,21 @@
 import { GqlHttpException, HttpStatus } from 'errors/errors';
-import { Max } from 'class-validator'
-import { Arg, Args, Ctx, Mutation, Query, Resolver } from 'type-graphql'
-import { prisma, redis } from '../../index'
-import { Studio, StudioInput, StudiosArgs, UpdateStudioInput } from './studio.schema'
+import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql'
+import { prisma } from '../../index'
+import { CreateStudioInput } from './input-schema/create-studio.schema';
+import { UpdateStudioInput } from './input-schema/update-studio.schema';
+import { GetStudiosArgs } from './input-schema/get-studio.schema';
+import { Studio } from './studio.schema'
  
 @Resolver()
 export class StudioResolver {
     @Mutation(() => Studio)
+    // or Roles  @Authorized('user, manager')
+    @Authorized('createStudio')
     async createStudio(
-        @Arg('data') data: StudioInput
+        @Arg('data') data: CreateStudioInput
     ) {
+        // validatePermission(data, 'userId', ['permission:studio:edit:rating'])
+
         const studio = prisma.studio.create({
             data,
         })
@@ -41,7 +47,6 @@ export class StudioResolver {
         })
     }
 
-
     @Mutation(() => Studio)
     async deleteStudio(@Arg('id') id: string) {
         return prisma.studio.delete({
@@ -51,9 +56,10 @@ export class StudioResolver {
         })
     }
 
+    // @Authorized('studios')
     @Query(() => [Studio]) 
     async studios(
-        @Args() { skip, take, search }: StudiosArgs
+        @Args() { skip, take, search }: GetStudiosArgs
     ) {
         const studios = await prisma.studio.findMany({
             take,
