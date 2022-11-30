@@ -45,7 +45,7 @@ model Studio {
   createdAt       DateTime @default(now())
   deleted         Boolean  @default(false)
   name            String   @db.VarChar(64)
-  rating          Float    @default(0)
+  rating          Float    @db.DoublePrecision()
     
   thumbnail       String   @db.Text
   series          Series[]

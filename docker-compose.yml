@@ -13,12 +13,20 @@ services:
     restart: always
     image: postgres:14
     ports:
-      - "5432:5432"
+      - "6543:5432"
     environment:
       - POSTGRES_USER=animakurouser
       - POSTGRES_PASSWORD=root
       - POSTGRES_DB=animakurodb
-    # volumes:
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: "test@example.com"
+  #     PGADMIN_DEFAULT_PASSWORD: "123456"
+  #   ports:
+  #     - "16543:80"
+  #   depends_on:
+  #     - postgresql-animakuro
   redis-animakuro:
     image: redis:latest
     ports:
