@@ -2,7 +2,7 @@
 
 ## Requirements:
 1.	Redis
-2.	MySQL/MariaDB
+2.	Postgresql
 3.	SMTP credentials
 
 ## Run
@@ -13,7 +13,13 @@ npx prisma migrate dev --name migration-name
 npx prisma generate
 ```
 
+
 ### Start 
+
+1) Run docker container with env file by the command
+docker-compose --env-file .env up 
+
+2) Run server on local
 ```shell
 pnpm dev
 ```
@@ -23,3 +29,5 @@ pnpm dev
 - Add express request to graphQL ctx
 - Solve issue with nanoid
 - Write error handler and custom errors
+
+
