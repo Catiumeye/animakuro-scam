@@ -3,7 +3,7 @@ import { Arg, Args, Authorized, Mutation, Query, Resolver } from 'type-graphql'
 import { prisma } from '../../index'
 import { CreateStudioInput } from './input-schema/create-studio.schema';
 import { UpdateStudioInput } from './input-schema/update-studio.schema';
-import { GetStudiosArgs } from './input-schema/get-studio.schema';
+import { GetStudiosArgs } from './input-schema/get-list-studio.schema';
 import { Studio } from './studio.schema'
  
 @Resolver()
