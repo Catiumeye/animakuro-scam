@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -45,8 +45,8 @@ model Studio {
   createdAt       DateTime @default(now())
   deleted         Boolean  @default(false)
   name            String   @db.VarChar(64)
-  rating          Float    @db.Float
-  // grade           Float    @db.Float      
+  rating          Float    @default(0)
+    
   thumbnail       String   @db.Text
   series          Series[]
 }

@@ -9,13 +9,15 @@ services:
   #     - redis-animakuro
   #   ports:
   #     - "8080:8080"
-  mysql-animakuro:
+  postgresql-animakuro:
     restart: always
-    image: mysql:latest
+    image: postgres:14
     ports:
-      - "3306:3306"
+      - "5432:5432"
     environment:
-      - MYSQL_ROOT_PASSWORD=toor
+      - POSTGRES_USER=animakurouser
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=animakurodb
     # volumes:
   redis-animakuro:
     image: redis:latest
