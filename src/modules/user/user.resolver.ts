@@ -3,8 +3,11 @@ import { prisma, redis } from '../../index'
 import { previewUrl, sendEmailChangeConfirmationMail } from '@utils/mail.util'
 import { compare, hash } from '@utils/password.util'
 import { randomUUID } from 'crypto'
-import { errors } from '../../errors/errors'
-import { Gender, User, UserInput } from './user.schema'
+import { errors, GqlHttpException, HttpStatus } from '../../errors/errors'
+import { Gender, User } from './user.schema'
+import { UpdateUserInput } from './input-schema/update-user.schema'
+import { ValidateSchemas } from 'validation'
+
 
 @Resolver(() => User)
 export class UserResolver {
@@ -18,14 +21,14 @@ export class UserResolver {
         return prisma.user.findUnique({ where: { id }})
     }
 
+    @ValidateSchemas()
     @Mutation(() => User)
-    async modifyUser(
+    async modifyUser( 
         @Arg('id') id: string,
-        @Arg('data') data: UserInput
+        @Arg('data') data: UpdateUserInput
     ) {
         const user = await prisma.user.findUnique({ where: { id }})
-        if (!user)
-            throw errors.NOT_FOUND('user')
+        if (!user) throw new GqlHttpException('User not found', HttpStatus.NOT_FOUND)
 
         const validationErrors: { property: string, reasons: string[] }[] = []
 
