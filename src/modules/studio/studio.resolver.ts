@@ -5,6 +5,7 @@ import { CreateStudioInput } from './input-schema/create-studio.schema';
 import { UpdateStudioInput } from './input-schema/update-studio.schema';
 import { GetStudiosArgs } from './input-schema/get-list-studio.schema';
 import { Studio } from './studio.schema'
+import { ValidateSchemas } from 'validation';
  
 @Resolver()
 export class StudioResolver {
@@ -57,6 +58,7 @@ export class StudioResolver {
     }
 
     // @Authorized('studios')
+    @ValidateSchemas()
     @Query(() => [Studio]) 
     async studios(
         @Args() { skip, take, search }: GetStudiosArgs
