@@ -41,6 +41,8 @@ export const ValidateSchemas = (validateSchemas: Function[]=[]) => {
                 for (const arg of args) {
                    if (!validateSchemas.length && typeof arg === 'object') {
                         await validateOrThrow(arg)
+
+                        return originalMethod.apply(this, args)
                    }
 
                    for (const schema of validateSchemas) {
@@ -52,7 +54,7 @@ export const ValidateSchemas = (validateSchemas: Function[]=[]) => {
                     }
                 }
             }
-    
+
             return descriptor
     }
 }
