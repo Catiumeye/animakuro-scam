@@ -13,6 +13,7 @@ import * as dotenv from 'dotenv'
 import { ExtendedGraphQLError } from 'errors/types'
 import exceptionsHandler from 'errors/exception-handler'
 
+
 dotenv.config()
 
 const PORT = +process.env.PORT || 8080
@@ -87,7 +88,6 @@ export const customAuthChecker: AuthChecker<ICustomContext> = (
     return true
 };
 
-
 async function createServer() {
     const app = express()
     const schema = await buildSchema({
@@ -98,12 +98,7 @@ async function createServer() {
         emitSchemaFile: true,
         authChecker: customAuthChecker,
         // authMode: 'null',
-        // globalMiddlewares: [
-        //     (req: any, res: any, next) => {
-        //         console.log(req.headers)
-        //         next()
-        //     }
-        // ]
+        validate: false
     })
 
     app.use(cors())

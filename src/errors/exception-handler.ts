@@ -1,9 +1,7 @@
-import { ArgumentValidationError } from "type-graphql";
 import type { ServerResponse } from 'http';
 
 import { GqlHttpException, HttpStatus } from "./errors";
 import type { ExtendedGraphQLError } from "./types";
-import { formatClassValidatorErrors } from "./utilts";
 
 
 const handleExceptions = (error: ExtendedGraphQLError) => {
@@ -11,13 +9,7 @@ const handleExceptions = (error: ExtendedGraphQLError) => {
         return error.originalError
     }
 
-    if (error.originalError instanceof ArgumentValidationError) {
-        const validationErrors = error.originalError.validationErrors;
-
-        return new GqlHttpException(
-            formatClassValidatorErrors(validationErrors), HttpStatus.BAD_REQUEST, 'validationErrors'
-        );
-    }
+    // ... other exceptions
 }
 
 const exceptionsHandler = (error: ExtendedGraphQLError, response: ServerResponse): GqlHttpException => {
