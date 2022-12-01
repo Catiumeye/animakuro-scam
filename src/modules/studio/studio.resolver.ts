@@ -15,7 +15,7 @@ export class StudioResolver {
     async createStudio(
         @Arg('data') data: CreateStudioInput
     ) {
-        // validatePermission(data, 'userId', ['permission:studio:edit:rating'])
+        // validateInputPermission(data, 'userId', ['permission:studio:edit:rating'])
 
         const studio = prisma.studio.create({
             data,

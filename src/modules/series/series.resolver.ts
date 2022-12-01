@@ -1,4 +1,4 @@
-import { validatePermission } from 'modules/auth/permission/permision-validator';
+import { validateInputPermission } from 'modules/auth/permission/input-permision-validator';
 import { Arg, Authorized, Mutation, Query, Resolver } from 'type-graphql'
 
 import { GqlHttpException, HttpStatus } from 'errors/errors'
@@ -17,7 +17,7 @@ export class SeriesResolver {
         @Arg('data') data: CreateSeriesInput,
     ) {
         // for AllowChangeBy decorator
-        // validatePermission(data, 'userId', ['createSeries'])
+        // validateInputPermission(data, 'userId', ['createSeries'])
 
         if (data.studio) {
             const isStudioExists = await prisma.studio.findFirst({

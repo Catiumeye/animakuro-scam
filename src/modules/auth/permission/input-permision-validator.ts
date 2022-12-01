@@ -3,7 +3,7 @@ import { METADATA_KEY } from "./allow-change-by.decorator";
 /**
  * Check if the user is allowed to change the field, use '@AllowChangeBy' decorator to define the rules
  **/
-export function validatePermission(target: any, uid: string, requestorScopes: string[]) {
+export function validateInputPermission(target: any, uid: string, requestorScopes: string[]) {
     const validationKeys = Reflect.getMetadata(METADATA_KEY, target) as string[];
 
     if (!validationKeys) {
