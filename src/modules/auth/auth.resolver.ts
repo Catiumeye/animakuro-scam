@@ -1,16 +1,48 @@
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql'
+import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { prisma, redis } from '../../index'
 import { signAuthToken, verifyAuthToken } from '@utils/jwt.util'
 import { verifyCode } from '@utils/2fa.util'
 import { previewUrl, sendEmailRegistrationConfirmationMail } from '@utils/mail.util'
 import { ICustomContext } from '../../types/custom-context.interface'
-import { ConfirmInput, LoginInput, LoginReturnType, LoginType, RegisterInput, TwoFAInput } from './auth.schema'
+import { ConfirmInput, LoginInput, LoginReturnType, LoginType, RegisterInput, ThirdPartyRedirectUrlReturnType, TwoFAInput } from './auth.schema'
 import { compare, hash } from '@utils/password.util'
-import { randomUUID } from 'crypto'
-import { errors } from '../../errors/errors'
- 
+import { randomUUID, createHash } from 'crypto'
+import { HttpStatus, GqlHttpException } from '../../errors/errors'
+import JwtTokenService from './jwt-token.service'
+import { FacebookStrategy } from './strategies/facebook.strategy'
+import { AuthService } from './auth.service'
+import { ThirdPartyAuthType, User } from 'modules/user/user.schema'
+import { UserService } from 'modules/user/user.service'
+import { ValidateSchemas } from 'validation'
+
+
+// type ThirdPartyAuthKey = `thirdparty-auth:${ThirdPartyAuthType}:${string}`
+// type EmailAuthKey = `email-auth:${string}`
+
+// type RedisKeys =  ThirdPartyAuthKey | EmailAuthKey
+
 @Resolver()
 export class AuthResolver {
+    private facebookStrategy: FacebookStrategy
+    private userService: UserService
+    private jwtTokenService: JwtTokenService
+    private authService: AuthService
+
+    constructor() {
+        this.facebookStrategy = new FacebookStrategy()
+        this.userService = new UserService()
+        this.jwtTokenService = new JwtTokenService()
+        this.authService = new AuthService()
+    }
+
+    private makeUniqueUsername = (id: string, prefix: ThirdPartyAuthType) => {
+        const charSum = prefix.split("").reduce((acc, val) => {
+            return acc + val.charCodeAt(0);
+         }, 0);
+    
+        return `${id}User${charSum}`
+    }
+    /*
     @Mutation(() => Boolean)
     async register(@Arg('data') data: RegisterInput) {
         const user = await prisma.user.findFirst({
@@ -20,7 +52,7 @@ export class AuthResolver {
         })
 
         if (user)
-            throw errors.AUTH_ERROR('EMAIL_TAKEN')
+            throw new GqlHttpException('EMAIL_TAKEN', HttpStatus.BAD_REQUEST, 'Auth Errors')
 
         // const code = await nanoid(30)
         const code = randomUUID()
@@ -38,7 +70,7 @@ export class AuthResolver {
     async confirmRegistration(@Arg('data') data: ConfirmInput) {
         const info = await redis.get(`confirmation:register:${data.token}`)
         if (!info)
-            throw errors.AUTH_ERROR('CONFIRMATION_TOKEN_INVALID')
+            throw new GqlHttpException('INVALID_TOKEN', HttpStatus.BAD_REQUEST, 'Auth Errors')
 
         await redis.del(`confirmation:register:${data.token}`)
         const { email, password, username }: RegisterInput = JSON.parse(info)
@@ -51,11 +83,11 @@ export class AuthResolver {
 
         if (user) {
             if (user.username === username)
-                throw errors.AUTH_ERROR('USERNAME_TAKEN')
+                throw new GqlHttpException('USERNAME_TAKEN', HttpStatus.BAD_REQUEST, 'Auth Errors')
 
             // TODO: Temporary, remove in next version
             if (user.email === email)
-                throw errors.AUTH_ERROR('EMAIL_TAKEN')
+                throw new GqlHttpException('EMAIL_TAKEN', HttpStatus.BAD_REQUEST, 'Auth Errors')
 
             return false
         }
@@ -80,7 +112,7 @@ export class AuthResolver {
         })
 
         if (!user || !await compare(data.password, user.password))
-            throw errors.AUTH_ERROR('CREDENTIALS_INVALID')
+            throw new GqlHttpException('INVALID_CREDENTIALS', HttpStatus.BAD_REQUEST, 'Auth Errors')
 
         if (user.secret2fa) {
             // const token = await nanoid(30)
@@ -96,7 +128,7 @@ export class AuthResolver {
         const session = await prisma.siteAuthSession.create({
             data: {
                 agent: ctx.request.headers['user-agent'],
-                ip: ctx.request.ip as string, // TODO: recheck
+                ip: ctx.request.socket.remoteAddress as string, // TODO: recheck
                 active: true,
                 userId: user.id
             }
@@ -112,7 +144,7 @@ export class AuthResolver {
     async confirm2fa(@Arg('data') data: TwoFAInput, @Ctx() ctx: ICustomContext) {
         const userId = await redis.get(`confirmation:2fa-auth:${data.token}`)
         if (!userId)
-            throw errors.AUTH_ERROR('TFA_TOKEN_INVALID')
+            throw new GqlHttpException('INVALID_2FA_CODE', HttpStatus.BAD_REQUEST, 'Auth Errors')
 
         // TODO: get user from DB and check his 2FA code (if 2fa still linked)!!!
         const user = await prisma.user.findUnique({
@@ -122,15 +154,15 @@ export class AuthResolver {
         })
 
         if (!user)
-            throw errors.INTERNAL()
+            throw new GqlHttpException('Bad request', HttpStatus.BAD_REQUEST)
 
         if (user.secret2fa && !verifyCode(user.secret2fa, data.code))
-            throw errors.AUTH_ERROR('TFA_TOKEN_INVALID')
+            throw new GqlHttpException('Invalid 2FA code', HttpStatus.BAD_REQUEST, 'Auth Errors')
 
         const session = await prisma.siteAuthSession.create({
             data: {
                 agent: ctx.request.headers['user-agent'],
-                ip: ctx.request.ip as string, // TODO: recheck
+                ip: ctx.request.socket.remoteAddress as string, // TODO: recheck
                 active: true,
                 userId: user.id
             }
@@ -155,8 +187,180 @@ export class AuthResolver {
         })
 
         if (!session)
-            throw errors.AUTH_ERROR('SESSION_INVALID')
+            throw new GqlHttpException('INVALID_SESSION', HttpStatus.BAD_REQUEST, 'Auth Errors')
 
         return true
     }
+    */
+
+    @Mutation(() => Boolean)
+    @ValidateSchemas()
+    async register(@Arg('data') data: RegisterInput) {
+        const user = await this.userService.findUserByEmailOrUsername(data.email, data.username)
+
+        if (user) {
+            if (user.username === data.username)
+                throw new GqlHttpException('USERNAME_TAKEN', HttpStatus.BAD_REQUEST, 'Auth Errors')
+
+            if (user.email === data.email)
+                throw new GqlHttpException('EMAIL_TAKEN', HttpStatus.BAD_REQUEST, 'Auth Errors')
+
+            return false
+        }
+
+        // const code = await nanoid(30)
+        const code = randomUUID()
+       
+        await this.authService.setRegisterConfirmation('test', data);
+
+        // Sending email
+        // const info = await sendEmailRegistrationConfirmationMail(data.email, `https://animakuro.domain/confirm/${code}`)
+
+        // console.log(previewUrl(info))
+
+        return true
+    }
+
+    @Mutation(() => Boolean)
+    async confirmRegistration(@Arg('code') code: string) {
+        const registerInput = await this.authService.getRegisterConfirmation(code);
+
+        if (!registerInput)
+            throw new GqlHttpException('CODE_NOT_FOUND', HttpStatus.NOT_FOUND, 'Auth Errors');
+
+        await this.authService.deleteRegisterConfirmation(code);
+
+        const { email, password, username } = registerInput;
+
+        const user = await this.userService.findUserByEmailOrUsername(email, username);
+
+        if (user) {
+            if (user.username === username)
+                throw new GqlHttpException('USERNAME_TAKEN', HttpStatus.BAD_REQUEST, 'Auth Errors')
+
+            if (user.email === email)
+                throw new GqlHttpException('EMAIL_TAKEN', HttpStatus.BAD_REQUEST, 'Auth Errors')
+
+            return false
+        }
+
+        const hashedPassword = await hash(password)
+
+        await this.userService.createUser({
+            email,
+            password: hashedPassword,
+            username
+        })
+
+        return true
+    }
+
+    @Mutation(() => Boolean)
+    async login(@Arg('data') data: LoginInput, @Ctx() ctx: ICustomContext) {
+
+        const user = await this.userService.findUserByUsername(data.username);
+
+        if (!user || !await compare(data.password, user.password))
+            throw new GqlHttpException('INVALID_CREDENTIALS', HttpStatus.BAD_REQUEST, 'Auth Errors')
+
+        const session = await this.authService.createSiteAuthSession({
+            agent: ctx.request.headers['user-agent'],
+            ip: ctx.request.socket.remoteAddress as string, // TODO: recheck
+            active: true,
+            userId: user.id
+        })
+
+        const accessToken = JwtTokenService.makeAccessToken({
+            uid: user.id,
+            sessionId: session.id,
+        })
+
+        JwtTokenService.setCookieAccessToken(ctx, accessToken)
+
+        return true;
+    }
+
+    @Mutation(() => Boolean)
+    async logout(
+            @Ctx() ctx: ICustomContext
+        ) {
+        const { userJwtPayload } = ctx;
+        // rewrite decorator
+
+        if (!userJwtPayload)
+            throw new GqlHttpException('INVALID_SESSION', HttpStatus.BAD_REQUEST, 'Auth Errors')
+
+
+        const session = this.authService.updateSiteAuthSession(userJwtPayload.sessionId, {
+            active: false,
+        })
+
+        JwtTokenService.removeCookieAccessToken(ctx);
+
+        if (!session)
+            throw new GqlHttpException('INVALID_SESSION', HttpStatus.BAD_REQUEST, 'Auth Errors')
+
+            
+        return true
+    }
+
+
+    @Mutation(() => User)
+    async loginOrRegisterThirdParty(
+        @Arg('code', () => String) code: string, 
+        @Arg('authType', () => ThirdPartyAuthType, { nullable: true }) authType: ThirdPartyAuthType, 
+        @Ctx() ctx: ICustomContext
+    ) {
+        const facebookUser = await this.facebookStrategy.getAccountData(code);
+
+        let user = await this.userService.findUserByThirdpartyAuth(facebookUser.id, ThirdPartyAuthType.FACEBOOK);
+
+        if (!user) {
+            user = await this.userService.createUserWithThirdParty(
+                {
+                    username: this.makeUniqueUsername(facebookUser.id, ThirdPartyAuthType.FACEBOOK),
+                }, 
+                {
+                    email: facebookUser.email,
+                    firstName: facebookUser.first_name,
+                    lastName: facebookUser.last_name,
+                    uid: facebookUser.id,
+                    type: ThirdPartyAuthType.FACEBOOK
+                }
+            )
+        }
+
+        const session = await this.authService.createSiteAuthSession({
+            agent: ctx.request.headers['user-agent'],
+            ip: ctx.request.socket.remoteAddress,
+            active: true,
+            userId: user.id
+        })
+
+        const accessToken = JwtTokenService.makeAccessToken({
+            uid: user.id,
+            sessionId: session.id,
+            thirdPartyAuth: {
+                type: ThirdPartyAuthType.FACEBOOK,
+                uid: facebookUser.id,
+            }
+        })
+
+        // const thirdpartyAuthRedisKey = JwtTokenService.getThirdPartyAuthRedisKey(ThirdPartyAuthType.FACEBOOK, facebookUser.id)
+
+        // await this.jwtTokenService.saveJwtAccessToken(thirdpartyAuthRedisKey, accessToken)
+
+        JwtTokenService.setCookieAccessToken(ctx, accessToken)
+
+        return user;
+    }
+
+    @Query(() => ThirdPartyRedirectUrlReturnType)
+    async getThirdPartyRedirectUrls() {
+
+        return {
+            facebook: this.facebookStrategy.getRedirectUrl()
+        }
+    }
+
 }

@@ -1,3 +1,4 @@
+import { JwtInputPayload } from './../modules/auth/jwt-token.service';
 import { Request, Response } from 'express'
 
 export interface ICustomContext {
@@ -6,4 +7,6 @@ export interface ICustomContext {
     response: Response & {
         json?: (data: unknown) => void;
     }
+
+    userJwtPayload?: JwtInputPayload;
 }

@@ -21,13 +21,11 @@ export class UpdateUserInput {
 
     @IsString()
     @ValidateIf((o) => o.newPassword)
-    @Match('newPassword')
     @Field({ nullable: true })
     password?: string
     
     @IsString()
     @ValidateIf((o) => o.password)
-    @Match('password')
     @Field({ nullable: true })
     newPassword: string
 

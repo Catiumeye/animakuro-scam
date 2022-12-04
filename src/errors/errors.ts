@@ -1,37 +1,3 @@
-import { _errorRegistry } from './registry'
-/**
- * @deprecated use GqlHttpException instead
- */
-export class ApiError extends Error {
-    readonly identifier: string
-    readonly description?: string
-    readonly data?: any
-
-    constructor(identifier: string, description?: string, data?: any) {
-        super(identifier)
-        this.identifier = identifier
-        this.description = description
-        this.data = data
-    }
-
-    public export() {
-        return {
-            identifier: this.identifier,
-            description: this.description || this.identifier,
-            ...(this.data ? this.data : {})
-        }
-    }
-}
-
-for (const entry of Object.entries(_errorRegistry)) {
-    _errorRegistry[entry[0]] = entry[1].bind(entry[1])
-}
-/**
- * @deprecated use GqlHttpException instead
- */
-export const errors = Object.freeze(_errorRegistry)
-
-
 export enum HttpStatus {
     CONTINUE = 100,
     SWITCHING_PROTOCOLS = 101,
@@ -91,6 +57,12 @@ export class GqlHttpException extends Error {
     readonly error: string;
     readonly message: any
 
+    /**
+     * 
+     * @param message Any type of message to be sent to client
+     * @param statusCode Status Code
+     * @param error String that describes error
+     */
     constructor(message: any, statusCode: HttpStatus, error?: string) {
         super(message)
         this.message = message;

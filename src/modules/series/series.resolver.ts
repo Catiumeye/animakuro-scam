@@ -86,7 +86,7 @@ export class SeriesResolver {
         })
     }
 
-
+    @Authorized()
     @Query(() => [Series]) 
     async series() {
         return prisma.series.findMany({

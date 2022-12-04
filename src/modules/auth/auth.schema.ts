@@ -1,14 +1,16 @@
 import { Field, InputType, ObjectType, registerEnumType } from 'type-graphql'
-import { IsEmail, Length } from 'class-validator'
+import { IsEmail, IsString, Length } from 'class-validator'
+
 
 @InputType()
 export class RegisterInput {
     @Field()
     @Length(1, 64)
-    username: string
+    username?: string
 
     @Field()
     @Length(1, 320)
+    @IsString()
     @IsEmail()
     email: string
 
@@ -21,7 +23,7 @@ export class RegisterInput {
 export class ConfirmInput {
     @Field()
     @Length(1, 255)
-    token: string
+    code: string
 }
 
 @InputType()
@@ -63,3 +65,11 @@ export enum LoginType {
 registerEnumType(LoginType, {
     name: 'LoginType'
 })
+
+
+@ObjectType()
+export class ThirdPartyRedirectUrlReturnType {
+    @Field()
+    facebook: string
+}
+

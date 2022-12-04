@@ -1,14 +1,15 @@
-import 'reflect-metadata'
 import express from 'express'
 import cors from 'cors'
-import { AuthChecker, buildSchema } from 'type-graphql'
+import { buildSchema } from 'type-graphql'
 import { graphqlUploadExpress } from 'graphql-upload'
 import { graphqlHTTP } from 'express-graphql'
 import { createClient } from 'redis'
-import { PrismaClient } from '@prisma/client'
+import cookieParser from 'cookie-parser'
 import { Server } from 'http'
-import { ICustomContext } from './types/custom-context.interface';
+import { PrismaClient } from '@prisma/client';
+import 'reflect-metadata'
 
+import { AuthCheckerMiddleware } from './modules/auth/middleware/auth-checker.middleware';
 import * as dotenv from 'dotenv'
 import { ExtendedGraphQLError } from 'errors/types'
 import exceptionsHandler from 'errors/exception-handler'
@@ -21,6 +22,8 @@ const PORT = +process.env.PORT || 8080
 export const redis = createClient({
     url: process.env.REDIS_URL,
 })
+
+
 
 export const prisma = new PrismaClient()
 
@@ -59,35 +62,6 @@ main().catch(console.error)
 const cache = {}
 
 
-export const customAuthChecker: AuthChecker<ICustomContext> = (
-    { root, args, context, info },
-    permissions,
-  ) => {
-    // checks perrmision access for Mutations and Queries fields
-
-    /*  EXAMPLE uncomment with exaple decorators in series resolvers and schemas
-
-        const userPermissions = [
-            'createSeries:name',
-            'createSeries',
-            'series:name',
-        ]
-
-        for (const allowed of permissions) {
-            for (const current of userPermissions) {
-                if (allowed === current) {
-                    return true
-                }
-            }
-        }
-
-        otherwise -
-        throw new GqlHttpException(`You don't have permission to access ${info.fieldName}`, HttpStatus.FORBIDDEN)
-    */
-
-    return true
-};
-
 async function createServer() {
     const app = express()
     const schema = await buildSchema({
@@ -96,12 +70,13 @@ async function createServer() {
             __dirname + '/**/*.resolver.js'
         ],
         emitSchemaFile: true,
-        authChecker: customAuthChecker,
+        authChecker: new AuthCheckerMiddleware().check,
         // authMode: 'null',
         validate: false
     })
 
     app.use(cors())
+    app.use(cookieParser())
     app.post('/graphql',
         graphqlUploadExpress(),
         graphqlHTTP((request, response) => {
