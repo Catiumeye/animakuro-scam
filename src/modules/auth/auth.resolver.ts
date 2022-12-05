@@ -1,12 +1,8 @@
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
-import { prisma, redis } from '../../index'
-import { signAuthToken, verifyAuthToken } from '@utils/jwt.util'
-import { verifyCode } from '@utils/2fa.util'
-import { previewUrl, sendEmailRegistrationConfirmationMail } from '@utils/mail.util'
 import { ICustomContext } from '../../types/custom-context.interface'
-import { ConfirmInput, LoginInput, LoginReturnType, LoginType, RegisterInput, ThirdPartyRedirectUrlReturnType, TwoFAInput } from './auth.schema'
+import { ThirdPartyRedirectUrlReturnType } from './auth.schema'
 import { compare, hash } from '@utils/password.util'
-import { randomUUID, createHash } from 'crypto'
+import { randomUUID } from 'crypto'
 import { HttpStatus, GqlHttpException } from '../../errors/errors'
 import JwtTokenService from './jwt-token.service'
 import { FacebookStrategy } from './strategies/facebook.strategy'
@@ -14,6 +10,8 @@ import { AuthService } from './auth.service'
 import { ThirdPartyAuthType, User } from 'modules/user/user.schema'
 import { UserService } from 'modules/user/user.service'
 import { ValidateSchemas } from 'validation'
+import { RegisterInput } from './input-schema/register.schema'
+import { LoginInput } from './input-schema/login.schema'
 
 
 // type ThirdPartyAuthKey = `thirdparty-auth:${ThirdPartyAuthType}:${string}`

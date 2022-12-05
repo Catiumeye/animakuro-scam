@@ -1,52 +1,17 @@
-import { Field, InputType, ObjectType, registerEnumType } from 'type-graphql'
-import { IsEmail, IsString, Length } from 'class-validator'
+import { Field, ObjectType, registerEnumType } from 'type-graphql'
 
 
-@InputType()
-export class RegisterInput {
-    @Field()
-    @Length(1, 64)
-    username?: string
 
-    @Field()
-    @Length(1, 320)
-    @IsString()
-    @IsEmail()
-    email: string
+// @InputType()
+// export class TwoFAInput {
+//     @Field()
+//     @Length(6, 6)
+//     code: string
 
-    @Field()
-    @Length(1, 255)
-    password: string
-}
-
-@InputType()
-export class ConfirmInput {
-    @Field()
-    @Length(1, 255)
-    code: string
-}
-
-@InputType()
-export class LoginInput {
-    @Field()
-    @Length(1, 64)
-    username: string
-
-    @Field()
-    @Length(1, 255)
-    password: string
-}
-
-@InputType()
-export class TwoFAInput {
-    @Field()
-    @Length(6, 6)
-    code: string
-
-    @Field()
-    @Length(1, 255)
-    token: string
-}
+//     @Field()
+//     @Length(1, 255)
+//     token: string
+// }
 
 @ObjectType()
 export class LoginReturnType {

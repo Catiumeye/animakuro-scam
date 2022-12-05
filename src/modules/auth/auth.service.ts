@@ -1,6 +1,6 @@
 import { prisma, redis } from "index";
 
-import { RegisterInput } from "./auth.schema";
+import { RegisterInput } from "./input-schema/register.schema";
 import { CreateSiteAuthSessionInput, UpdateSiteAuthSessionInput } from "./input-schema/site-auth-session.schema";
 
 

@@ -1,4 +1,3 @@
-import { redis } from "index";
 import { decode, JwtPayload, sign, verify } from "jsonwebtoken";
 import { ICustomContext } from "types/custom-context.interface";
 import { ThirdPartyAuthType } from './../user/user.schema';
@@ -37,7 +36,7 @@ export default class JwtTokenService {
         // }
     }
 
-    static ACCESS_TOKEN_COOKIE_NAME = 'access-token';
+    static ACCESS_TOKEN_COOKIE_NAME = 'animakuro-access-token';
 
     static verifyAccessToken(token: string) {
         return verify(token, process.env.JWT_SECRET!) as JwtInputPayload & JwtPayload;
