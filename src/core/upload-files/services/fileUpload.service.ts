@@ -11,7 +11,7 @@ import {
 export class FileUploadService {
     constructor(private prisma: PrismaService) {}
 
-    randomNum(min, max) {
+    randomNum(min: any | number, max: any | number) {
         return Math.floor(Math.random() * (max - min)) + min; // You can remove the Math.floor if you don't want it to be an integer
     }
 
