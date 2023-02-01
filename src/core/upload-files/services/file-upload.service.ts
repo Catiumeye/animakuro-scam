@@ -6,13 +6,18 @@ import {
     Resources,
     ResponseFileSource,
 } from '../types/fileUpload.types';
+import { CdnService } from './cdn.service';
+import { FileUploadDto } from '../interfaces/upload.interface';
 
 @Injectable()
 export class FileUploadService {
-    constructor(private prisma: PrismaService) {}
+    constructor(
+        private prisma: PrismaService,
+        private cdnService: CdnService,
+    ) {}
 
     randomNum(min: any | number, max: any | number) {
-        return Math.floor(Math.random() * (max - min)) + min; // You can remove the Math.floor if you don't want it to be an integer
+        return Math.floor(Math.random() * (max - min)) + min;
     }
 
     async createFile({ file }: CreateFileInput): Promise<Resources> {
@@ -37,16 +42,26 @@ export class FileUploadService {
         }
     }
 
+    async uploadFileToCDN(file: FileUploadDto) {
+        const { ids, urls } = await this.cdnService.upload([file]);
+        const [id] = ids;
+        const [url] = urls;
+        console.log({ ids, id, urls, url });
+        return url;
+    }
+
+    async uploadFilesToCDN(files: FileUploadDto[]) {
+        const { ids, urls } = await this.cdnService.upload(files);
+        console.log({ ids, urls });
+        return urls;
+    }
+
     async uploadFormDataInToCDN(
         baseUrl: string,
         bucket: string,
         formData: FormData,
     ): Promise<ResponseFileSource> {
         const url = baseUrl + '/' + bucket;
-
-        /* const headers = formData.getHeaders(); */
-        // headers['Authorization'] = req.headers['authorization'];
-
         try {
             const response = await fetch(url, {
                 method: 'POST',

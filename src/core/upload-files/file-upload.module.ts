@@ -1,10 +1,13 @@
 import { PrismaService } from '../../common/services/prisma.service';
 import { Module } from '@nestjs/common';
 import { FileResolver } from './resolvers/fileUpload.resolver';
-import { FileUploadService } from './services/fileUpload.service';
+import { FileUploadService } from './services/file-upload.service';
+import { ConfigModule } from '@nestjs/config';
+import { CdnService } from './services/cdn.service';
 
 @Module({
-    providers: [FileUploadService, FileResolver, PrismaService],
+    imports: [ConfigModule],
+    providers: [FileUploadService, FileResolver, PrismaService, CdnService],
     exports: [FileUploadService],
 })
 export class FileUploadModule {}
