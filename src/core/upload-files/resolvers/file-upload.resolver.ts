@@ -9,20 +9,7 @@ export class FileResolver {
     constructor(private readonly FUService: FileUploadService) {}
 
     @Mutation(() => Resources)
-    async uploadFile(
-        @Args({ name: 'file', type: () => GraphQLUpload })
-        file: FileUploadDto,
-    ): Promise<any> {
-        const { mimetype } = file;
-        if (mimetype.match(/^image\/(jpeg|gif)$/)) {
-            return this.FUService.createFile({ file });
-        } else {
-            throw new Error(`File wasn't mime(${mimetype}) type correctly`);
-        }
-    }
-
-    @Mutation(() => Resources)
-    async uploadFileToCdn(
+    async uploadFileToCDN(
         @Args({ name: 'file', type: () => GraphQLUpload })
         file: FileUploadDto,
     ): Promise<any> {
@@ -37,26 +24,22 @@ export class FileResolver {
         return this.FUService.uploadFilesToCDN(fileList);
     }
 
-    @Mutation(() => [Resources])
-    async uploadFiles(
-        @Args('files', { type: () => [GraphQLUpload] })
-        fileList: FileUploadDto[],
-    ): Promise<FileUploadDto[]> {
-        const files: Resources[] = [];
-        (await Promise.all(fileList)).forEach(async (file) => {
-            files.push(await this.FUService.createFile({ file }));
-        });
-        return files as any[];
-    }
-
     @Mutation(() => Boolean)
     async deleteFile(
         @Args('url', { type: () => String })
-        resourceId: string,
+        url: string,
     ) {
-        const deletingFromDB = await this.FUService.deleteDataInToDB(
+        const [cdnBucket, resourceId] = url.split('/');
+        const deletingFromCDN = this.FUService.deleteFromCDN(
             resourceId,
+            url,
+            cdnBucket,
         );
+        const deletingFromDB = this.FUService.deleteFromDB(
+            resourceId,
+            cdnBucket,
+        );
+        await Promise.all([deletingFromCDN, deletingFromDB]);
         return true;
     }
 }

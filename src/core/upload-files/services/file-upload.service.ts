@@ -20,28 +20,6 @@ export class FileUploadService {
         return Math.floor(Math.random() * (max - min)) + min;
     }
 
-    async createFile({ file }: CreateFileInput): Promise<Resources> {
-        const { createReadStream, filename } = file;
-        try {
-            await new Promise((resolve, reject) =>
-                createReadStream()
-                    .pipe(createWriteStream(`./uploads/${filename}`))
-                    .on('finish', resolve)
-                    .on('error', reject),
-            );
-            return await this.uploadDataInToDB(
-                'userId',
-                `./uploads/${filename}`,
-                filename,
-            );
-        } catch (error: any) {
-            throw new HttpException(
-                `Could not save image, ${error.message}`,
-                HttpStatus.BAD_REQUEST,
-            );
-        }
-    }
-
     async uploadFileToCDN(file: FileUploadDto) {
         const { ids, urls } = await this.cdnService.upload([file]);
         const [id] = ids;
@@ -56,42 +34,12 @@ export class FileUploadService {
         return urls;
     }
 
-    async uploadFormDataInToCDN(
-        baseUrl: string,
-        bucket: string,
-        formData: FormData,
-    ): Promise<ResponseFileSource> {
-        const url = baseUrl + '/' + bucket;
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData,
-            });
-
-            const data: ResponseFileSource = await response.json();
-            return data;
-        } catch (er) {
-            throw er;
-        }
+    deleteFromCDN(resourceId: string, url: string, cdnBucket: string) {
+        return this.cdnService.delete(resourceId, url, cdnBucket);
     }
 
-    async uploadDataInToDB(
-        userId: string,
-        cdnBucket: string,
-        resourceId: string,
-    ) {
-        console.log('uploading into db');
-        return this.prisma.resources.create({
-            data: {
-                userId,
-                cdnBucket,
-                resourceId,
-            },
-        });
-    }
-
-    async deleteDataInToDB(resourceId: string) {
-        return await this.prisma.resources.delete({
+    deleteFromDB(resourceId: string, cdnBucket: string) {
+        return this.prisma.resources.delete({
             where: {
                 resourceId,
             },
