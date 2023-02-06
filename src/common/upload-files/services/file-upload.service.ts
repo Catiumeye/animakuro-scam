@@ -10,30 +10,15 @@ export class FileUploadService {
         private cdnService: CdnService,
     ) {}
 
-    randomNum(min: any | number, max: any | number) {
-        return Math.floor(Math.random() * (max - min)) + min;
-    }
-
     async uploadFileToCDN(file: IUpload) {
-        const uploadRes = await this.cdnService.upload([file]);
-        console.log({ uploadRes });
-        console.error();
+        return this.cdnService.upload([file]);
     }
 
     async uploadFilesToCDN(files: IUpload[]) {
-        const result = await this.cdnService.upload(files);
-        console.error({ result });
+        return this.cdnService.upload(files);
     }
 
-    deleteFromCDN(ids: string, urls: string) {
-        return this.cdnService.delete(ids, urls);
-    }
-
-    deleteFromDB(resourceId: string, cdnBucket: string) {
-        return this.prisma.resources.delete({
-            where: {
-                resourceId,
-            },
-        });
+    async deleteFromCDN(id: string) {
+        return this.cdnService.delete(id, 'test1');
     }
 }

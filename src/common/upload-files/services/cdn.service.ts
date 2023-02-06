@@ -25,7 +25,6 @@ export class CdnService {
 
     async upload(files: IUpload[]) {
         const streams = files.map((file) => {
-            console.log(file);
             return file.createReadStream();
         });
         try {
@@ -40,9 +39,9 @@ export class CdnService {
             );
         }
     }
-    async delete(ids: string, urls: string) {
+    async delete(id: string, bucket_name: string) {
         try {
-            return await this.cdnClient.deleteFileById(ids, urls);
+            return await this.cdnClient.deleteFileById(id, bucket_name);
         } catch (error: any) {
             throw new HttpException(
                 `Could not delete image, ${error.message}`,

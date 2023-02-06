@@ -33,3 +33,12 @@ export class UploadCdnResponce {
     @Field(() => [String])
     ids: string[];
 }
+
+@ObjectType('DeleteCdnUtput')
+export class DeleteCdnResponce {
+    @Field(() => Boolean)
+    success: boolean;
+
+    @Field(() => String)
+    message: string;
+}
