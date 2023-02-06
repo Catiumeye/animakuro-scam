@@ -2,7 +2,7 @@ import geoip from 'geoip-lite';
 import requestIp from 'request-ip';
 import { RegisterInputType } from '../models/inputs/register-input.type';
 import { UserService } from '../../user/services/user.service';
-import { AuthType, MailPurpose, TokenType } from "../../../common/models/enums";
+import { AuthType, MailPurpose, TokenType } from '../../../common/models/enums';
 import { LoginInputType } from '../models/inputs/login-input.type';
 import { User } from '../../user/models/user.model';
 import { RegisterResultsType } from '../models/results/register-results.type';
@@ -72,7 +72,7 @@ export class AuthService {
                 country: geoLookUp?.country,
                 region: geoLookUp?.region,
                 city: geoLookUp?.city,
-                timezone: geoLookUp?.timezone
+                timezone: geoLookUp?.timezone,
             },
         );
         return {
@@ -84,12 +84,12 @@ export class AuthService {
 
     async loginSocial(
         access_token: string,
-        auth_type: AuthType
+        auth_type: AuthType,
     ): Promise<LoginResultsType> {
         const auth = await this.prisma.auth.findFirst({
             where: {
-                access_token
-            }
+                access_token,
+            },
         });
         // TODO move validation in decorator
         if (!auth) {
@@ -97,17 +97,17 @@ export class AuthService {
                 success: false,
                 errors: [
                     {
-                        property: "access_token",
+                        property: 'access_token',
                         value: access_token,
-                        reason: "No user matched by this token"
-                    }
+                        reason: 'No user matched by this token',
+                    },
                 ],
                 access_token: undefined,
-                user: null
+                user: null,
             };
         }
         const user = await this.userService.findOneById(
-            auth!.user_id as string
+            auth!.user_id as string,
         );
         return {
             success: true,
@@ -122,7 +122,7 @@ export class AuthService {
     ): Promise<RegisterResultsType> {
         args.password = await this.passwordService.encrypt(args.password);
         const user = await this.prisma.user.create({
-            data: args as any
+            data: args as any,
         });
         const hash = this.tokenService.generateToken(
             user.id,
@@ -189,7 +189,7 @@ export class AuthService {
                 email: profile.account.email,
                 username: profile.account.username,
                 avatar: profile.account.avatar,
-                user_id: result.user!.id
+                user_id: result.user!.id,
             },
         });
         const user = await this.prisma.user.findFirst({
@@ -197,7 +197,7 @@ export class AuthService {
                 id: result.user?.id,
             },
             include: {
-                auth: true
+                auth: true,
             },
         });
         return {
@@ -211,13 +211,13 @@ export class AuthService {
         // TODO made cleanup database and store after user logout
         const auth = await this.prisma.auth.findFirst({
             where: {
-                access_token
+                access_token,
             },
         });
         const authorizedUserId = auth?.user_id;
         const authorizedSession = await this.prisma.authSession.findFirst({
             where: {
-                user_id: authorizedUserId
+                user_id: authorizedUserId,
             },
         });
         await this.prisma.authSession.update({
@@ -225,7 +225,7 @@ export class AuthService {
                 id: authorizedSession!.id,
             },
             data: {
-                active: false
+                active: false,
             },
         });
         return { success: true };

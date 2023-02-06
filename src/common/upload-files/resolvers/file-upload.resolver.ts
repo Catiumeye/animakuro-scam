@@ -1,27 +1,29 @@
 import { Mutation, Resolver, Args } from '@nestjs/graphql';
 import { FileUploadService } from '../services/file-upload.service';
 import { GraphQLUpload } from 'graphql-upload';
-import { FileUploadDto } from '../interfaces/upload.interface';
-import { Resources } from '../types/fileUpload.types';
+import { UploadCdnResponce } from '../types/fileUpload.types';
+import { IUpload } from '../interfaces/upload.interface';
 
 @Resolver()
 export class FileResolver {
     constructor(private readonly FUService: FileUploadService) {}
 
-    @Mutation(() => Resources)
+    @Mutation(() => UploadCdnResponce)
     async uploadFileToCDN(
         @Args({ name: 'file', type: () => GraphQLUpload })
-        file: FileUploadDto,
+        file: IUpload,
     ): Promise<any> {
+        console.log({ file });
         return this.FUService.uploadFileToCDN(file);
     }
 
-    @Mutation(() => [Resources])
+    @Mutation(() => [UploadCdnResponce])
     async uploadFilesToCDN(
         @Args('files', { type: () => [GraphQLUpload] })
-        fileList: FileUploadDto[],
-    ): Promise<string[]> {
-        return this.FUService.uploadFilesToCDN(fileList);
+        fileList: IUpload[],
+    ): Promise<any> {
+        console.log({ fileList });
+        return this.FUService.uploadFilesToCDN(await Promise.all(fileList));
     }
 
     @Mutation(() => Boolean)
@@ -30,11 +32,7 @@ export class FileResolver {
         url: string,
     ) {
         const [cdnBucket, resourceId] = url.split('/');
-        const deletingFromCDN = this.FUService.deleteFromCDN(
-            resourceId,
-            url,
-            cdnBucket,
-        );
+        const deletingFromCDN = this.FUService.deleteFromCDN(resourceId, url);
         const deletingFromDB = this.FUService.deleteFromDB(
             resourceId,
             cdnBucket,

@@ -1,22 +1,38 @@
-import { RemoveFile, SendFilesFromStreams } from '@animakuro/animakuro-cdn';
 import { PrismaService } from '../../services/prisma.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileUploadDto } from '../interfaces/upload.interface';
+import CdnClient from '@animakuro/animakuro-cdn';
+import { IUpload } from '../interfaces/upload.interface';
 
 @Injectable()
 export class CdnService {
     constructor(
         private configService: ConfigService,
         private prisma: PrismaService,
-    ) {}
+    ) {
+        this.initCdnClient();
+    }
 
-    async upload(files: FileUploadDto[]) {
-        const streams = files.map((file) => file.createReadStream());
+    initCdnClient() {
         const url = this.configService.getOrThrow<string>('CDN_URL');
-        const bucket = this.configService.getOrThrow<string>('CDN_BUCKET');
+        const buckets = JSON.parse(
+            this.configService.getOrThrow<string>('CDN_BUCKET'),
+        );
+        this.cdnClient = new CdnClient(url, buckets);
+    }
+
+    private cdnClient: CdnClient;
+
+    async upload(files: IUpload[]) {
+        const streams = files.map((file) => {
+            console.log(file);
+            return file.createReadStream();
+        });
         try {
-            return await SendFilesFromStreams(streams, url, bucket);
+            return await this.cdnClient.uploadFilesFromStreams(
+                streams,
+                'test1',
+            );
         } catch (error: any) {
             throw new HttpException(
                 `Could not save image, ${error.message}`,
@@ -24,9 +40,9 @@ export class CdnService {
             );
         }
     }
-    async delete(resourceId: string, url: string, cdnBucket: string) {
+    async delete(ids: string, urls: string) {
         try {
-            return await RemoveFile(resourceId, url, cdnBucket);
+            return await this.cdnClient.deleteFileById(ids, urls);
         } catch (error: any) {
             throw new HttpException(
                 `Could not delete image, ${error.message}`,
