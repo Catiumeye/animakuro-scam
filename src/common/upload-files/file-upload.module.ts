@@ -1,4 +1,4 @@
-import { PrismaService } from '../../common/services/prisma.service';
+import { PrismaService } from '../services/prisma.service';
 import { Module } from '@nestjs/common';
 import { FileResolver } from './resolvers/file-upload.resolver';
 import { FileUploadService } from './services/file-upload.service';
