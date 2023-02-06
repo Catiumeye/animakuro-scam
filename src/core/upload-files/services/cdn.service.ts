@@ -1,5 +1,5 @@
 import { RemoveFile, SendFilesFromStreams } from '@animakuro/animakuro-cdn';
-import { PrismaService } from '../../../common/services/prisma.service';
+import { PrismaService } from '../../services/prisma.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileUploadDto } from '../interfaces/upload.interface';

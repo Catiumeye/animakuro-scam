@@ -1,12 +1,9 @@
 import { PrismaService } from '../../services/prisma.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import CdnClient, { SendFilesResp } from '@animakuro/animakuro-cdn';
+import CdnClient from '@animakuro/animakuro-cdn';
 import { IUpload } from '../interfaces/upload.interface';
 
-type ResourcesWhereUniqueInput = {
-    resourceId?: string;
-};
 
 @Injectable()
 export class CdnService {
@@ -66,7 +63,7 @@ export class CdnService {
         }
     }
 
-    
+
     async uploadDataInToDB(data: any) {
         console.log('uploading into db');
         return this.prisma.resources.create({ data });
