@@ -1,4 +1,4 @@
-import { Mutation, Resolver, Args } from '@nestjs/graphql';
+import { Mutation, Resolver, Args, ResolveField } from '@nestjs/graphql';
 import { FileUploadService } from '../services/file-upload.service';
 import { GraphQLUpload } from 'graphql-upload';
 import {
@@ -17,7 +17,7 @@ export class UploadMutationResolvers extends UploadRootResolver {
         super();
     }
 
-    @Mutation(() => UploadFileResultsType)
+    @ResolveField(() => UploadFileResultsType)
     async uploadFileToCDN(
         @Args({ name: 'file', type: () => GraphQLUpload })
         file: IUpload,
@@ -25,7 +25,7 @@ export class UploadMutationResolvers extends UploadRootResolver {
         return this.FUService.uploadFileToCDN(file);
     }
 
-    @Mutation(() => UploadFileResultsType)
+    @ResolveField(() => UploadFileResultsType)
     async uploadFilesToCDN(
         @Args('files', { type: () => [GraphQLUpload] })
         fileList: IUpload[],
@@ -33,7 +33,7 @@ export class UploadMutationResolvers extends UploadRootResolver {
         return this.FUService.uploadFilesToCDN(await Promise.all(fileList));
     }
 
-    @Mutation(() => DeleteFileResultsType)
+    @ResolveField(() => DeleteFileResultsType)
     async deleteFile(
         @Args('id', { type: () => String })
         id: string,
