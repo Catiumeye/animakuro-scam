@@ -4,7 +4,6 @@ import { ConfigService } from '@nestjs/config';
 import CdnClient from '@animakuro/animakuro-cdn';
 import { IUpload } from '../interfaces/upload.interface';
 
-
 @Injectable()
 export class CdnService {
     private cdnClient;
@@ -36,7 +35,7 @@ export class CdnService {
                     this.uploadDataInToDB({
                         uploader: 'uploader',
                         file_id: id,
-                        cdn_bucket: url.split('.com/')[1].split('/')[0],
+                        cdn_bucket: 'test1',
                     });
                 }),
             );
@@ -48,13 +47,15 @@ export class CdnService {
             );
         }
     }
-    async delete(id: string, bucket_name: string) {
+    async delete(id: string, bucket_name: string): Promise<any> {
         try {
-            const [dt1, _] = await Promise.all([
-                this.cdnClient.deleteFileById(id, bucket_name),
-                this.deleteDataInToDB(id),
-            ]);
-            return dt1;
+            const resp = await this.cdnClient.deleteFileById(id, bucket_name);
+            if (resp[success] !== true) {
+                throw new Error();
+            } else {
+                await this.deleteDataInToDB(id);
+                return resp;
+            }
         } catch (error: any) {
             throw new HttpException(
                 `Could not delete image, ${error.message}`,
@@ -62,7 +63,6 @@ export class CdnService {
             );
         }
     }
-
 
     async uploadDataInToDB(data: any) {
         console.log('uploading into db');
