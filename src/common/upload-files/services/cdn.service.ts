@@ -51,7 +51,10 @@ export class CdnService {
         try {
             const resp = await this.cdnClient.deleteFileById(id, bucket_name);
             if (!resp?.success) {
-                throw new Error();
+                throw new HttpException(
+                    `Could not delete image`,
+                    HttpStatus.BAD_REQUEST,
+                );
             } else {
                 await this.deleteDataInToDB(id);
                 return resp;
