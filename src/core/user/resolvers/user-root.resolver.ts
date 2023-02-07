@@ -31,7 +31,6 @@ export class UserQueryType {
 
 @Resolver()
 export class UserRootResolver {
-
     @Mutation(() => UserMutationType, { description: 'User mutations' })
     userMutations() {
         return {};
