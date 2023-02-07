@@ -50,7 +50,7 @@ export class CdnService {
     async delete(id: string, bucket_name: string): Promise<any> {
         try {
             const resp = await this.cdnClient.deleteFileById(id, bucket_name);
-            if (resp[success] !== true) {
+            if (!resp?.success) {
                 throw new Error();
             } else {
                 await this.deleteDataInToDB(id);
