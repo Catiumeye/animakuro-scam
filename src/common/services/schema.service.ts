@@ -37,14 +37,15 @@ import { UserAnimeMutationResolver } from '../../core/user-anime/resolvers/user-
 import { UserProfileRootResolver } from '../../core/user-profile/resolvers/user-profile-root.resolver';
 import { UserProfileQueryResolver } from '../../core/user-profile/resolvers/user-profile-query.resolver';
 import { UserProfileMutationResolver } from '../../core/user-profile/resolvers/user-profile-mutation.resolver';
-import { CatalogRootResolver } from "../../core/catalog/resolvers/catalog-root.resolver";
-import { CatalogQueryResolver } from "../../core/catalog/resolvers/catalog-query.resolver";
+import { CatalogRootResolver } from '../../core/catalog/resolvers/catalog-root.resolver';
+import { CatalogQueryResolver } from '../../core/catalog/resolvers/catalog-query.resolver';
 import { AiringScheduleRootResolver } from '../../core/airing-schedule/resolvers/airing-schedule-root.resolver';
 import { AiringScheduleQueryResolver } from '../../core/airing-schedule/resolvers/airing-schedule-query.resolver';
 import { AiringScheduleMutationResolver } from '../../core/airing-schedule/resolvers/airing-schedule-mutation.resolver';
 import { AuthSessionRootResolver } from '../../core/auth-session/resolvers/auth-session-root.resolver';
 import { AuthSessionQueryResolver } from '../../core/auth-session/resolvers/auth-session-query.resolver';
 import { AuthSessionMutationResolver } from '../../core/auth-session/resolvers/auth-session-mutation.resolver';
+import { UploadRootResolver } from '../upload-files/resolvers/upload-root.resolver';
 
 @Injectable()
 export class SchemaService {
@@ -91,6 +92,7 @@ export class SchemaService {
             AiringScheduleRootResolver,
             AiringScheduleQueryResolver,
             AiringScheduleMutationResolver,
+            UploadRootResolver,
         ]);
         fs.writeFile(
             path.resolve(__dirname + '../../../../schema.gql'),
