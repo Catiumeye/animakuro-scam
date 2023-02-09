@@ -7,6 +7,7 @@ import {
 } from 'class-validator';
 import {  GraphQLUpload } from 'graphql-upload';
 import { ArgsType, Field } from '@nestjs/graphql';
+import { Resources } from '@prisma/client';
 
 @ValidatorConstraint()
 class imageUpload implements ValidatorConstraintInterface {
@@ -41,6 +42,15 @@ export interface IUpload {
     createReadStream: () => Stream;
 }
 
+
+export interface ResourceOut extends Resources {
+    url: string;
+}
+
+export interface ResourceOutArray {
+    files: ResourceOut[];
+}
+
 @ArgsType()
 export class FileUploadDto {
     @Field(() => GraphQLUpload)
@@ -50,7 +60,7 @@ export class FileUploadDto {
 
 @ArgsType()
 export class FilesUploadDto {
-    @Field(() => GraphQLUpload)
+    @Field(() => [GraphQLUpload])
     @isImage({
         message: 'Only png,jpeg and gif images are allowed',
         each: true,

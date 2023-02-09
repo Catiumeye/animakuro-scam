@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { CdnService } from './cdn.service';
 import { IUpload } from '../interfaces/upload.interface';
 
+
 @Injectable()
 export class FileUploadService {
     constructor(
@@ -23,6 +24,6 @@ export class FileUploadService {
     }
 
     async getFiles(cdn_bucket: string) {
-        return this.cdnService.getFiles(cdn_bucket);
+        return { files: this.cdnService.getFiles(cdn_bucket) };
     }
 }

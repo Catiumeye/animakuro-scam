@@ -7,15 +7,17 @@ import { IUpload } from '../interfaces/upload.interface';
 @Injectable()
 export class CdnService {
     private cdnClient;
+    url: string;
+    buckets: string;
     constructor(
         private configService: ConfigService,
         private prisma: PrismaService,
     ) {
-        const url = this.configService.getOrThrow<string>('CDN_URL');
-        const buckets = JSON.parse(
+        this.url = this.configService.getOrThrow<string>('CDN_URL');
+        this.buckets = JSON.parse(
             this.configService.getOrThrow<string>('CDN_BUCKET'),
         );
-        this.cdnClient = new CdnClient(url, buckets);
+        this.cdnClient = new CdnClient(this.url, this.buckets);
     }
 
     async upload(files: IUpload[]) {
@@ -79,10 +81,15 @@ export class CdnService {
 
     async getFiles(cdn_bucket: string) {
         console.log('get images from db');
-        return this.prisma.resources.findMany({
+        const elems = await this.prisma.resources.findMany({
             where: {
                 cdn_bucket,
-            }
-        })
+            },
+        });
+        return  elems.map((e) => ({
+            ...e,
+            
+            url: `${this.url}${e.cdn_bucket}/${e.file_id}`,
+        }));
     }
 }

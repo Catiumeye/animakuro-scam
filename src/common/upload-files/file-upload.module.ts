@@ -4,6 +4,7 @@ import { UploadMutationResolvers } from './resolvers/file-upload.resolver';
 import { FileUploadService } from './services/file-upload.service';
 import { ConfigModule } from '@nestjs/config';
 import { CdnService } from './services/cdn.service';
+import { FilesQueryResolver } from './resolvers/file-upload-query.resolver';
 
 @Module({
     imports: [ConfigModule],
@@ -12,6 +13,7 @@ import { CdnService } from './services/cdn.service';
         UploadMutationResolvers,
         PrismaService,
         CdnService,
+        FilesQueryResolver
     ],
     exports: [FileUploadService],
 })

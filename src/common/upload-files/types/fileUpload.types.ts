@@ -6,6 +6,7 @@ import {
     GraphQLISODateTime,
 } from '@nestjs/graphql';
 import { IUpload } from '../interfaces/upload.interface';
+import { User } from '../../../core/user/models/user.model';
 
 @InputType()
 export class CreateFileInput {
@@ -19,18 +20,24 @@ export class InputFilesType {
 }
 
 @ObjectType()
-export class GetFilesResultsType {
-    @Field(() => GraphQLISODateTime)
-    created_at: Date;
-
-    @Field(() => String)
-    uploader: string;
+export class GetFileResultType {
+    @Field(() => User)
+    uploader: User;
 
     @Field(() => String)
     file_id: string;
 
     @Field(() => String)
     cdn_bucket: string;
+
+    @Field(() => String)
+    url: string;
+}
+
+@ObjectType('GetFilesResults')
+export class GetFilesResultsType {
+    @Field(() => [GetFileResultType])
+    files: GetFileResultType[];
 }
 
 @ObjectType('UploadFile')

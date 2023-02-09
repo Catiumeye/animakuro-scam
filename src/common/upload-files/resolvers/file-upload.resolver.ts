@@ -16,6 +16,7 @@ export class UploadMutationResolvers extends UploadRootResolver {
         super();
     }
 
+
     @ResolveField(() => UploadFileResultsType)
     async uploadFileToCDN(@Args() { file }: FileUploadDto): Promise<any> {
         return this.FUService.uploadFileToCDN(await file);
@@ -25,6 +26,8 @@ export class UploadMutationResolvers extends UploadRootResolver {
     async uploadFilesToCDN(@Args() { files }: FilesUploadDto): Promise<any> {
         return this.FUService.uploadFilesToCDN(await Promise.all(files));
     }
+
+
 
     @ResolveField(() => DeleteFileResultsType)
     async deleteFile(
