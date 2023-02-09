@@ -1,21 +1,18 @@
 import { Resolver, Args, ResolveField } from '@nestjs/graphql';
 import { FileUploadService } from '../services/file-upload.service';
+import { DeleteFileResultsType } from '../model/result/delete-file-result.type';
 import {
-    DeleteFileResultsType,
-    UploadFileResultsType,
-} from '../types/fileUpload.types';
-import { FilesUploadDto, FileUploadDto } from '../interfaces/upload.interface';
-import {
-    UploadMutationType,
-    UploadRootResolver,
-} from '../resolvers/upload-root.resolver';
+    FilesUploadDto,
+    FileUploadDto,
+} from '../validation/arg.validations.type';
+import { UploadMutationType, UploadRootResolver } from './upload-root.resolver';
+import { UploadFileResultsType } from '../model/result/upload-file-result.type';
 
 @Resolver(UploadMutationType)
 export class UploadMutationResolvers extends UploadRootResolver {
     constructor(private readonly FUService: FileUploadService) {
         super();
     }
-
 
     @ResolveField(() => UploadFileResultsType)
     async uploadFileToCDN(@Args() { file }: FileUploadDto): Promise<any> {
@@ -26,8 +23,6 @@ export class UploadMutationResolvers extends UploadRootResolver {
     async uploadFilesToCDN(@Args() { files }: FilesUploadDto): Promise<any> {
         return this.FUService.uploadFilesToCDN(await Promise.all(files));
     }
-
-
 
     @ResolveField(() => DeleteFileResultsType)
     async deleteFile(

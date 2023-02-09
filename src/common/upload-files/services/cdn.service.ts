@@ -2,7 +2,7 @@ import { PrismaService } from '../../services/prisma.service';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import CdnClient from '@animakuro/animakuro-cdn';
-import { IUpload } from '../interfaces/upload.interface';
+import { IUpload } from '../model/interface/upload.interface';
 import pass from '../../config/buckets';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class CdnService {
                 streams,
                 bucket_name,
             );
-            /*const urls = files?.urls || [];
+            const urls = files?.urls || [];
             const ids = files?.ids || [];
             Promise.all(
                 urls.map((url: string, i: number) => {
@@ -42,7 +42,7 @@ export class CdnService {
                         cdn_bucket: bucket_name,
                     });
                 }),
-            ); */
+            );
             return files;
         } catch (error: any) {
             throw new HttpException(
@@ -88,7 +88,7 @@ export class CdnService {
                 cdn_bucket,
             },
         });
-        return  elems.map((e) => ({
+        return elems.map((e) => ({
             ...e,
 
             url: `${this.url}${e.cdn_bucket}/${e.file_id}`,

@@ -1,9 +1,7 @@
+import { UploadFileResultsType } from '../model/result/upload-file-result.type';
 import { Field, Mutation, ObjectType, Resolver, Query } from '@nestjs/graphql';
-import {
-    DeleteFileResultsType,
-    UploadFileResultsType,
-    GetFilesResultsType,
-} from '../types/fileUpload.types';
+import { DeleteFileResultsType } from '../model/result/delete-file-result.type';
+import { GetFilesResultsType } from '../model/result/get-file-result.type';
 
 @ObjectType()
 export class UploadMutationType {

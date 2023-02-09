@@ -1,13 +1,10 @@
-import { Stream } from 'stream';
 import {
     registerDecorator,
     ValidationOptions,
     ValidatorConstraint,
     ValidatorConstraintInterface,
 } from 'class-validator';
-import {  GraphQLUpload } from 'graphql-upload';
-import { ArgsType, Field } from '@nestjs/graphql';
-import { Resources } from '@prisma/client';
+import { IUpload } from '../model/interface/upload.interface';
 
 @ValidatorConstraint()
 class imageUpload implements ValidatorConstraintInterface {
@@ -33,37 +30,4 @@ export function isImage(validationOptions?: ValidationOptions) {
             validator: imageUpload,
         });
     };
-}
-
-export interface IUpload {
-    filename: string;
-    mimetype: string;
-    encoding: string;
-    createReadStream: () => Stream;
-}
-
-
-export interface ResourceOut extends Resources {
-    url: string;
-}
-
-export interface ResourceOutArray {
-    files: ResourceOut[];
-}
-
-@ArgsType()
-export class FileUploadDto {
-    @Field(() => GraphQLUpload)
-    @isImage({ message: 'Only png,jpeg and gif images are allowed' })
-    file: IUpload;
-}
-
-@ArgsType()
-export class FilesUploadDto {
-    @Field(() => [GraphQLUpload])
-    @isImage({
-        message: 'Only png,jpeg and gif images are allowed',
-        each: true,
-    })
-    files: [IUpload];
 }

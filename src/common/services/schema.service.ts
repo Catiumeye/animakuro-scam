@@ -46,7 +46,7 @@ import { AuthSessionRootResolver } from '../../core/auth-session/resolvers/auth-
 import { AuthSessionQueryResolver } from '../../core/auth-session/resolvers/auth-session-query.resolver';
 import { AuthSessionMutationResolver } from '../../core/auth-session/resolvers/auth-session-mutation.resolver';
 import { UploadRootResolver } from '../upload-files/resolvers/upload-root.resolver';
-import { FilesQueryResolver } from '../upload-files/resolvers/file-upload-query.resolver';
+import { FilesQueryResolver } from '../upload-files/resolvers/upload-query.resolver';
 
 @Injectable()
 export class SchemaService {
@@ -95,7 +95,6 @@ export class SchemaService {
             AiringScheduleMutationResolver,
             UploadRootResolver,
             FilesQueryResolver,
-
         ]);
         fs.writeFile(
             path.resolve(__dirname + '../../../../schema.gql'),

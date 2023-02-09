@@ -1,10 +1,10 @@
 import { ResolveField, Resolver, Args } from '@nestjs/graphql';
 import { FilesQueryType, UploadRootResolver } from './upload-root.resolver';
 import { FileUploadService } from '../services/file-upload.service';
-import {
-    GetFilesResultsType,
-    InputFilesType
-} from '../types/fileUpload.types';
+import { GetFilesResultsType } from '../model/result/get-file-result.type';
+import { CdnInputType } from '../model/input/cdn-input.type';
+
+//import { ResourceOutArray } from '../interfaces/upload.interface';
 
 @Resolver(FilesQueryType)
 export class FilesQueryResolver extends UploadRootResolver {
@@ -15,8 +15,8 @@ export class FilesQueryResolver extends UploadRootResolver {
     @ResolveField(() => GetFilesResultsType)
     async getFiles(
         @Args('cdn_bucket', { description: 'cdn bucket name' })
-        { cdn_bucket }: InputFilesType,
-    ): Promise<ResourceOutArray> {
+        { cdn_bucket }: CdnInputType,
+    ): Promise<any> {
         const elems = await this.FUService.getFiles(cdn_bucket);
         return elems;
     }

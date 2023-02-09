@@ -1,9 +1,8 @@
 import { PrismaService } from '../../services/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { CdnService } from './cdn.service';
-import { IUpload } from '../interfaces/upload.interface';
+import { IUpload } from '../model/interface/upload.interface';
 import pass from '../../config/buckets';
-
 
 @Injectable()
 export class FileUploadService {
