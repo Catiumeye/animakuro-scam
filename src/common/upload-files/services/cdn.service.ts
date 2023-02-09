@@ -3,6 +3,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import CdnClient from '@animakuro/animakuro-cdn';
 import { IUpload } from '../interfaces/upload.interface';
+import pass from '../../config/buckets';
 
 @Injectable()
 export class CdnService {
@@ -12,9 +13,7 @@ export class CdnService {
         private prisma: PrismaService,
     ) {
         const url = this.configService.getOrThrow<string>('CDN_URL');
-        const buckets = JSON.parse(
-            this.configService.getOrThrow<string>('CDN_BUCKET'),
-        );
+        const buckets = pass[0].bucket;
         this.cdnClient = new CdnClient(url, buckets);
     }
 
@@ -23,11 +22,14 @@ export class CdnService {
             return file.createReadStream();
         });
         try {
+            const bucket_name = JSON.parse(pass[0].bucket)
+                .map((item: { name: string }) => item.name)
+                .toString();
             const files = await this.cdnClient.uploadFilesFromStreams(
                 streams,
-                'test1',
+                bucket_name,
             );
-            const urls = files?.urls || [];
+            /*const urls = files?.urls || [];
             const ids = files?.ids || [];
             Promise.all(
                 urls.map((url: string, i: number) => {
@@ -35,10 +37,10 @@ export class CdnService {
                     this.uploadDataInToDB({
                         uploader: 'uploader',
                         file_id: id,
-                        cdn_bucket: 'test1',
+                        cdn_bucket: bucket_name,
                     });
                 }),
-            );
+            ); */
             return files;
         } catch (error: any) {
             throw new HttpException(

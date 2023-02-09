@@ -2,6 +2,7 @@ import { PrismaService } from '../../services/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { CdnService } from './cdn.service';
 import { IUpload } from '../interfaces/upload.interface';
+import pass from '../../config/buckets';
 
 @Injectable()
 export class FileUploadService {
@@ -19,6 +20,6 @@ export class FileUploadService {
     }
 
     async deleteFromCDN(id: string) {
-        return this.cdnService.delete(id, 'test1');
+        return this.cdnService.delete(id, pass[0].bucket);
     }
 }

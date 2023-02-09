@@ -20,6 +20,9 @@ export class User {
     })
     is_email_confirmed: boolean | null;
 
-    @Field(() => String, { nullable: true, description: "Avatar (image) of the user" })
+    @Field(() => String, {
+        nullable: true,
+        description: 'Avatar (image) of the user',
+    })
     avatar: string | null;
 }
