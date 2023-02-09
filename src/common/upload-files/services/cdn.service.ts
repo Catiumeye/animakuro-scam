@@ -76,4 +76,9 @@ export class CdnService {
         console.log('delete from db');
         return this.prisma.resources.delete({ where: { file_id } });
     }
+
+    async getFiles() {
+        console.log('get images from db');
+        return this.prisma.resources.findMany();
+    }
 }
