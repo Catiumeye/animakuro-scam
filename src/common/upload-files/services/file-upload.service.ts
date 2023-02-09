@@ -21,4 +21,8 @@ export class FileUploadService {
     async deleteFromCDN(id: string) {
         return this.cdnService.delete(id, 'test1');
     }
+
+    async getFiles(cdn_bucket: string) {
+        return this.cdnService.getFiles(cdn_bucket);
+    }
 }
