@@ -1,7 +1,7 @@
 import { ResolveField, Resolver, Args } from '@nestjs/graphql';
 import { FilesQueryType, UploadRootResolver } from './upload-root.resolver';
 import { FileUploadService } from '../services/file-upload.service';
-import { GetFilesResultsType } from '../types/fileUpload.types';
+import { GetFilesResultsType, InputFilesType } from '../types/fileUpload.types';
 import { Resources } from '@prisma/client';
 
 @Resolver(FilesQueryType)
@@ -10,9 +10,9 @@ export class FilesQueryResolver extends UploadRootResolver {
         super();
     }
 
-    @ResolveField(() => [GetFilesResultsType])
+    @ResolveField(() => GetFilesResultsType)
     async getFiles(
-        @Args('cdn_bucket') cdn_bucket: string,
+        @Args('cdn_bucket', type: InputFilesType) cdn_bucket: string,
     ): Promise<Resources[]> {
         return await this.FUService.getFiles(cdn_bucket);
     }

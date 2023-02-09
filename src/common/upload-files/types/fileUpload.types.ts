@@ -12,6 +12,11 @@ export class CreateFileInput {
     @Field(() => GraphQLUpload)
     file: IUpload;
 }
+@InputType()
+export class InputFilesType {
+    @Field(() => String)
+    cdn_bucket: string;
+}
 
 @ObjectType()
 export class GetFilesResultsType {

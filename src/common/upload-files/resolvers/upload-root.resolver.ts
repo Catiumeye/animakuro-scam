@@ -20,7 +20,7 @@ export class UploadMutationType {
 @ObjectType()
 export class FilesQueryType {
     @Field(() => GetFilesResultsType, { description: 'Get data of image' })
-    getUser: GetFilesResultsType;
+    getFiles: GetFilesResultsType;
 }
 
 @Resolver()
