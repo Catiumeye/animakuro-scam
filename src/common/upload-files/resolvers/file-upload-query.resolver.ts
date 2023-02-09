@@ -1,4 +1,4 @@
-import { ResolveField, Resolver } from '@nestjs/graphql';
+import { ResolveField, Resolver, Args } from '@nestjs/graphql';
 import { FilesQueryType, UploadRootResolver } from './upload-root.resolver';
 import { FileUploadService } from '../services/file-upload.service';
 import { GetFilesResultsType } from '../types/fileUpload.types';
@@ -11,8 +11,9 @@ export class FilesQueryResolver extends UploadRootResolver {
     }
 
     @ResolveField(() => [GetFilesResultsType])
-    async getFiles(): Promise<Resources[]> {
-        return await this.FUService.getFiles();
+    async getFiles(
+        @Args('cdn_bucket') cdn_bucket: string,
+    ): Promise<Resources[]> {
+        return await this.FUService.getFiles(cdn_bucket);
     }
-
 }

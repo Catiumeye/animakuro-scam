@@ -22,7 +22,7 @@ export class FileUploadService {
         return this.cdnService.delete(id, 'test1');
     }
 
-    async getFiles() {
-        return this.cdnService.getFiles();
+    async getFiles(cdn_bucket: string) {
+        return this.cdnService.getFiles(cdn_bucket);
     }
 }
