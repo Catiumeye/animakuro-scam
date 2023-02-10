@@ -2,10 +2,11 @@ import { PrismaService } from '../../services/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { CdnService } from './cdn.service';
 import { IUpload } from '../model/interface/upload.interface';
-import pass from '../../config/buckets';
+import { CdnBucket } from '../../config/buckets';
 
 @Injectable()
 export class FileUploadService {
+    buckets = new CdnBucket();
     constructor(
         private prisma: PrismaService,
         private cdnService: CdnService,
@@ -20,7 +21,12 @@ export class FileUploadService {
     }
 
     async deleteFromCDN(id: string) {
-        return this.cdnService.delete(id, pass[0].bucket);
+        return this.cdnService.delete(
+            id,
+            JSON.parse(this.buckets.getBucket())
+                .map((item: { name: string }) => item.name)
+                .toString(),
+        );
     }
 
     async getFiles(cdn_bucket: string) {

@@ -1,6 +1,6 @@
 import { GraphQLUpload } from 'graphql-upload';
 import { ArgsType, Field } from '@nestjs/graphql';
-import { isImage } from '../validation/validation.class';
+import { isImage } from './validation-schema-decorator';
 import { IUpload } from '../model/interface/upload.interface';
 
 @ArgsType()

@@ -3,20 +3,19 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import CdnClient from '@animakuro/animakuro-cdn';
 import { IUpload } from '../model/interface/upload.interface';
-import pass from '../../config/buckets';
+import { CdnBucket } from '../../config/buckets';
 
 @Injectable()
 export class CdnService {
     private cdnClient;
-    url: string;
-    buckets: string;
+    private url: string;
+    private buckets = new CdnBucket();
     constructor(
         private configService: ConfigService,
         private prisma: PrismaService,
     ) {
         this.url = this.configService.getOrThrow<string>('CDN_URL');
-        this.buckets = pass[0].bucket;
-        this.cdnClient = new CdnClient(this.url, this.buckets);
+        this.cdnClient = new CdnClient(this.url, this.buckets.getBucket());
     }
 
     async upload(files: IUpload[]) {
@@ -24,7 +23,7 @@ export class CdnService {
             return file.createReadStream();
         });
         try {
-            const bucket_name = JSON.parse(pass[0].bucket)
+            const bucket_name = JSON.parse(this.buckets.getBucket())
                 .map((item: { name: string }) => item.name)
                 .toString();
             const files = await this.cdnClient.uploadFilesFromStreams(
