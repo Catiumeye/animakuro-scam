@@ -15,12 +15,16 @@ export class UploadMutationResolvers extends UploadRootResolver {
     }
 
     @ResolveField(() => UploadFileResultsType)
-    async uploadFileToCDN(@Args() { file }: FileUploadDto): Promise<any> {
+    async uploadFileToCDN(
+        @Args() { file }: FileUploadDto,
+    ): Promise<UploadFileResultsType | void> {
         return this.FUService.uploadFileToCDN(await file);
     }
 
     @ResolveField(() => UploadFileResultsType)
-    async uploadFilesToCDN(@Args() { files }: FilesUploadDto): Promise<any> {
+    async uploadFilesToCDN(
+        @Args() { files }: FilesUploadDto,
+    ): Promise<UploadFileResultsType | void> {
         return this.FUService.uploadFilesToCDN(await Promise.all(files));
     }
 
@@ -28,7 +32,7 @@ export class UploadMutationResolvers extends UploadRootResolver {
     async deleteFile(
         @Args('id', { type: () => String })
         id: string,
-    ) {
+    ): Promise<DeleteFileResultsType> {
         const result = await this.FUService.deleteFromCDN(id);
         return result;
     }

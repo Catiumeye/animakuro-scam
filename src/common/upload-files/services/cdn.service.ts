@@ -4,6 +4,11 @@ import { ConfigService } from '@nestjs/config';
 import CdnClient from '@animakuro/animakuro-cdn';
 import { IUpload } from '../model/interface/upload.interface';
 import { CdnBucket } from '../../config/buckets';
+import { UploadFileResultsType } from '../model/result/upload-file-result.type';
+import { DeleteFileResultsType } from '../model/result/delete-file-result.type';
+import { Resources } from '@prisma/client';
+import { GetFileResultType } from '../model/result/get-file-result.type';
+import { IPrismaUploadDB } from '../model/interface/upload-in-db.interface';
 
 @Injectable()
 export class CdnService {
@@ -18,7 +23,7 @@ export class CdnService {
         this.cdnClient = new CdnClient(this.url, this.buckets.getBucket());
     }
 
-    async upload(files: IUpload[]) {
+    async upload(files: IUpload[]): Promise<UploadFileResultsType | void> {
         const streams = files.map((file) => {
             return file.createReadStream();
         });
@@ -50,7 +55,10 @@ export class CdnService {
             );
         }
     }
-    async delete(id: string, bucket_name: string): Promise<any> {
+    async delete(
+        id: string,
+        bucket_name: string,
+    ): Promise<DeleteFileResultsType> {
         try {
             const resp = await this.cdnClient.deleteFileById(id, bucket_name);
             if (!resp?.success) {
@@ -70,17 +78,17 @@ export class CdnService {
         }
     }
 
-    async uploadDataInToDB(data: any) {
+    async uploadDataInToDB(data: IPrismaUploadDB) {
         console.log('uploading into db');
         return this.prisma.resources.create({ data });
     }
 
-    async deleteDataInToDB(file_id: string | undefined) {
+    async deleteDataInToDB(file_id: string | undefined): Promise<Resources> {
         console.log('delete from db');
         return this.prisma.resources.delete({ where: { file_id } });
     }
 
-    async getFiles(cdn_bucket: string) {
+    async getFiles(cdn_bucket: string): Promise<GetFileResultType[]> {
         console.log('get images from db');
         const elems = await this.prisma.resources.findMany({
             where: {

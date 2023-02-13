@@ -1,7 +1,10 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, GraphQLISODateTime } from '@nestjs/graphql';
 
 @ObjectType()
 export class GetFileResultType {
+    @Field(() => GraphQLISODateTime)
+    created_at: Date;
+
     @Field(() => String)
     uploader: string;
 

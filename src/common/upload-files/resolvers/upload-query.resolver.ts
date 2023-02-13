@@ -4,8 +4,6 @@ import { FileUploadService } from '../services/file-upload.service';
 import { GetFilesResultsType } from '../model/result/get-file-result.type';
 import { CdnInputType } from '../model/input/cdn-input.type';
 
-//import { ResourceOutArray } from '../interfaces/upload.interface';
-
 @Resolver(FilesQueryType)
 export class FilesQueryResolver extends UploadRootResolver {
     constructor(private readonly FUService: FileUploadService) {
@@ -16,7 +14,7 @@ export class FilesQueryResolver extends UploadRootResolver {
     async getFiles(
         @Args('cdn_bucket', { description: 'cdn bucket name' })
         { cdn_bucket }: CdnInputType,
-    ): Promise<any> {
+    ): Promise<GetFilesResultsType> {
         const elems = await this.FUService.getFiles(cdn_bucket);
         return elems;
     }
