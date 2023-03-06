@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { MarkdownEntities } from "../models/enums/markdown.enum";
 import { PrismaService } from "./prisma.service";
 
 
@@ -47,15 +48,13 @@ const entitySelect = {
         // is_favourite
     }
 }
-const EntityKeywords = ['anime', 'studio', 'author', 'character'];
 const AttrParams = ['columns', 'size', 'shape'];
-
-// type TParsedAttrs = Array<{entity: typeof EntityKeywords[number]; id_list: string[]; args: keyof typeof AttrParams}>;
 
 @Injectable()
 export class MarkdownService {
-    private REGEX = new RegExp(`<(${EntityKeywords.join('|')}):(([a-f\\d-]{36},?)+)((\\s+(\\w+)=(\\w+))*)>`, 'ig');
-
+    private REGEX = new RegExp(`<(${Object.values(MarkdownEntities).join('|')}):(([a-f\\d-]{36},?)+)((\\s+(${AttrParams.join('|')})=(\\w+))*)>`, 'ig');
+    private IMAGE_FIELDS = ['thumbnail', 'cover', 'banner'];
+    private TITLE_FIELDS = ['name'];
 
 
     constructor(
@@ -63,13 +62,12 @@ export class MarkdownService {
     ) {}
 
     public parseAttrs(markdown: string) {
-        const regex = new RegExp(`<(${EntityKeywords.join('|')}):(([a-f\\d-]{36},?)+)((\\s+(${AttrParams.join('|')})=(\\w+))*)>`, 'ig');
-        const tags = markdown.matchAll(regex);
+        const tags = markdown.matchAll(this.REGEX);
         const arrayTags = [...tags];
 
         const parsedcollectionData = []
         for (let i = 0; i < arrayTags.length; i++) {
-            const entity: typeof EntityKeywords[number] = arrayTags[i][1];
+            const entity = arrayTags[i][1];
             const id_list = arrayTags[i][2].split(',');
             const args = arrayTags[i][4].trim().split(' ')
                 .reduce((prev, current) => {
@@ -88,7 +86,7 @@ export class MarkdownService {
         return parsedcollectionData;
     }
 
-    public async receivingData(parsedcollectionData: any): Promise<any> {
+    public async receivingData(parsedcollectionData: any): Promise<Array<{[key: string]: any}>> {
         const promisesCollectionData = []
         for (let i = 0; i < parsedcollectionData.length; i++) {
             const entity = parsedcollectionData[i].entity;
@@ -108,28 +106,60 @@ export class MarkdownService {
         return await Promise.all(promisesCollectionData);
     }
 
-    public async normalizeData(parsedData: any, receivedData: any) {
+
+    /**
+     * Transform all fields to single standard
+     * Example:: 'cover.url' or 'thumbnail.url' to 'img_url'
+     * Example:: 'name' to 'title'
+     */
+    private transformDataFields(data: Array<{[key: string]: any}>) {
+        const transformedData = data.map(item => {
+            const returnObj: {[key: string]: any} = {...item};
+            
+            //title field
+            const foundTitleField = this.TITLE_FIELDS.find(titleField => item.hasOwnProperty(titleField));
+            if (foundTitleField) {
+                returnObj.title = item[foundTitleField];
+                delete returnObj[foundTitleField];
+            }
+
+            //image field
+            const foundImgField = this.IMAGE_FIELDS.find(imgField => item.hasOwnProperty(imgField));
+            if (foundImgField) {
+                returnObj.img_url = item[foundImgField]?.url || null;
+                delete returnObj[foundImgField];
+            } 
+
+            return returnObj;  
+        })
+        
+        return transformedData;
+    }
+
+    public async normalizeData(parsedData: Array<{[key: string]: any}>, receivedData: any) {
         const completeData = [];
         for (let i = 0; i < parsedData.length; i++) {
             const entity = parsedData[i].entity;
             const args = parsedData[i].args;
-            const data = receivedData[i];
+            const data = this.transformDataFields(receivedData[i]);
+            
             completeData.push({entity, args, data});
         }
 
         return completeData;
     }
 
-    public async getParsed(markdown?: string | null) {
-        if (!markdown) return null;
+    public async getConverted(markdown?: string | null) {
+        if (!markdown) return undefined;
 
+        //Markdown to json form
         const parsedData = this.parseAttrs(markdown);
         
+        //Getting data from tags
         const receivedData = await this.receivingData(parsedData);  
 
+        //Prettify data
         const normalizedData = this.normalizeData(parsedData, receivedData);
-
-        // console.log('normal', normalizedData);
 
         return normalizedData;
     }

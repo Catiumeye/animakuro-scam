@@ -1,49 +1,27 @@
 import { BaseResultsType } from "@app/common/models/results";
-import { Field, ID, Int, ObjectType } from "@nestjs/graphql";
+import { MarkdownDataAnime, MarkdownDataAuthor, MarkdownDataCharacter, MarkdownDataStudio } from "@app/common/models/results/markdown.results.type";
+import { createUnionType, Field, Float, ID, Int, ObjectType, registerEnumType } from "@nestjs/graphql";
 
-@ObjectType()
-class MarkCollectionDataProps {
-    @Field(() => String)
-    title: string;
-    
-    @Field(() => String)
-    image_url: string;
-}
 
-@ObjectType()
-class MarkCollectionDataArgs {
-    @Field(() => Number)
-    columns: number;
-}
-
-@ObjectType()
-class MarkCollectionData {
-    @Field(() => ID, {
-        description: 'UUID of entity'
-    })
-    attr_id: string;
-
-    @Field(() => MarkCollectionDataProps)
-    props: MarkCollectionDataProps;
-
-    @Field(() => MarkCollectionDataArgs)
-    args: MarkCollectionDataArgs
-}
-
-@ObjectType()
-class MarkCollection {
-    @Field(() => String, {
-        nullable: true,
-        description: 'Raw markdown data'
-    })
-    text?: string;
-
-    @Field(() => [MarkCollectionData], {
-        nullable: true,
-        description: 'Parsed markdown data'
-    })
-    data?: MarkCollectionData[];
-}
+const MarkdownDataUnion = createUnionType({
+    name: 'MarkdownDataUnion',
+    types: () => [MarkdownDataAnime, MarkdownDataStudio, MarkdownDataAuthor, MarkdownDataCharacter] as const,
+    resolveType(value) {        
+        if (value.entity === 'studio') {
+            return MarkdownDataStudio;
+        }
+        if (value.entity === 'anime') {
+            return MarkdownDataAnime;
+        }
+        if (value.entity === 'author') {
+            return MarkdownDataAuthor;
+        }
+        if (value.entity === 'character') {
+            return MarkdownDataCharacter;
+        }
+        return null;
+    }
+  });
 
 @ObjectType()
 export class GetMarkdownCollectionResultsType extends BaseResultsType {
@@ -53,8 +31,9 @@ export class GetMarkdownCollectionResultsType extends BaseResultsType {
     })
     markdown?: string;
 
-    @Field(() => String, {
+    @Field(() => [MarkdownDataUnion], {
+        nullable: true,
         description: 'Parsed data'
     })
-    data?: string;
+    data?: Array<typeof MarkdownDataUnion>;
 }

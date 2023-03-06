@@ -301,8 +301,10 @@ export class UserCollectionService {
     ): Promise<GetMarkdownCollectionResultsType> {
         const str =
             '**Это крутые аниме **\n' +
-            '<anime:1484d58b-bd26-4fed-99a0-d0ba53da3827,9a189481-ba95-4091-a6e9-95ae42319ee2 columns=8 size=large>' +
-            '<studio:2a968ac7-b82a-41ce-beb6-25f790a4b31b,e34522f4-6656-4d97-a0f5-728089494bef columns=3 shape=circle>';
+            '<anime:02bfd954-3cf5-47a1-953b-daad7054c6d6,59b92892-1258-43a9-8d68-3db4f3b076b5 columns=8 size=large>' +
+            '<studio:2a968ac7-b82a-41ce-beb6-25f790a4b31b,e34522f4-6656-4d97-a0f5-728089494bef columns=3 shape=circle>' +
+            '<character:6b2c741d-ed72-4c38-a0f6-53c9f0f69daf>' +
+            '<author:75f855d1-9148-434c-8552-07fdb1c277a4,bc9ee071-5935-4d1f-a99f-9f2c1a0646e3>';
         let markdown: any = '';
         if (args.id) {
             markdown = await this.prisma.userCollectionMardown.findUnique({
@@ -322,12 +324,12 @@ export class UserCollectionService {
 
         markdown = markdown?.markdown || '';
 
-        const data = await this.markdownService.getParsed(markdown);
-
+        const data = await this.markdownService.getConverted(str);
+        
         return {
             success: true,
-            markdown: markdown,
-            data: JSON.stringify(data),
+            markdown: markdown || str,
+            data: data as any,
         };
     }
 
@@ -345,14 +347,14 @@ export class UserCollectionService {
             },
         });
 
-        const parsedMarkdown = await this.markdownService.getParsed(
+        const parsedMarkdown = await this.markdownService.getConverted(
             createdMarkdown.markdown,
         );
-
+        
         return {
             success: true,
             markdown: args.markdown,
-            data: JSON.stringify(parsedMarkdown),
+            data: parsedMarkdown,
         };
     }
 
@@ -390,7 +392,7 @@ export class UserCollectionService {
             });
         }
 
-        const parsedMarkdown = await this.markdownService.getParsed(
+        const parsedMarkdown = await this.markdownService.getConverted(
             updatedMarkdown.markdown,
         );
 
